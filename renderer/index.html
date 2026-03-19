@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Live Interactive</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- TITLE BAR -->
+  <div class="titlebar">
+    <div class="titlebar-drag">
+      <span class="titlebar-icon">🎮</span>
+      <span class="titlebar-title">TikTok Live Interactive</span>
+    </div>
+    <div class="titlebar-buttons">
+      <button class="tb-btn minimize" id="btn-minimize">─</button>
+      <button class="tb-btn maximize" id="btn-maximize">□</button>
+      <button class="tb-btn close" id="btn-close">✕</button>
+    </div>
+  </div>
+
+  <!-- CONNECTION BAR -->
+  <div class="connection-bar">
+    <div class="connection-left">
+      <div class="status-dot" id="status-dot"></div>
+      <span class="status-text" id="status-text">Desconectado</span>
+    </div>
+    <div class="connection-center">
+      <span class="at-sign">@</span>
+      <input type="text" id="username-input" placeholder="Digite o username do TikTok" spellcheck="false">
+      <button class="btn-connect" id="btn-connect">Conectar</button>
+    </div>
+    <div class="connection-right">
+      <span class="viewer-count" id="viewer-count">👁 0</span>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <button class="nav-btn active" data-tab="modelos">
+        <span class="nav-icon">🎮</span>
+        <span class="nav-label">Teclas</span>
+      </button>
+      <button class="nav-btn" data-tab="edits">
+        <span class="nav-icon">🎬</span>
+        <span class="nav-label">Edits</span>
+      </button>
+      <button class="nav-btn" data-tab="ranking">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-label">Camadas</span>
+      </button>
+      <button class="nav-btn" data-tab="links">
+        <span class="nav-icon">🔗</span>
+        <span class="nav-label">Links</span>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <div class="live-events" id="live-events-indicator" style="display:none;">
+        <span class="pulse-dot"></span>
+        <span>LIVE</span>
+      </div>
+    </nav>
+
+    <!-- CONTENT AREA -->
+    <div class="content">
+
+      <!-- TAB: MODELOS -->
+      <div class="tab-content active" id="tab-modelos">
+        <!-- Models List View -->
+        <div id="models-list-view">
+          <div class="tab-header">
+            <h2>Modelos de Teclas</h2>
+            <p class="tab-desc">Crie modelos de mapeamento de teclas para diferentes jogos interativos</p>
+          </div>
+          <div class="keyboard-controls">
+            <button class="btn-add" id="btn-add-model">+ Adicionar Modelo</button>
+          </div>
+          <div class="models-list" id="models-list">
+            <div class="empty-state" id="models-empty">
+              <span class="empty-icon">🎮</span>
+              <p>Nenhum modelo criado</p>
+              <p class="empty-sub">Clique em "+ Adicionar Modelo" para começar</p>
+            </div>
+          </div>
+        </div>
+        <!-- Model Detail View (hidden by default) -->
+        <div id="model-detail-view" style="display:none;">
+          <div class="model-detail-header">
+            <button class="btn-back" id="btn-back-models">← Voltar</button>
+            <h2 id="model-detail-name">Nome do Modelo</h2>
+          </div>
+          <div class="keyboard-controls">
+            <button class="btn-add" id="btn-add-key-map">+ Adicionar Mapeamento</button>
+          </div>
+          <div class="key-mappings-list" id="key-mappings-list">
+            <div class="empty-state" id="keyboard-empty">
+              <span class="empty-icon">⌨️</span>
+              <p>Nenhum mapeamento criado</p>
+              <p class="empty-sub">Clique em "+ Adicionar Mapeamento" para começar</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: EDITS -->
+      <div class="tab-content" id="tab-edits">
+        <div class="tab-header">
+          <h2>Edits (Vídeos/GIFs)</h2>
+          <p class="tab-desc">Associe presentes a vídeos ou GIFs que serão exibidos na live via overlay</p>
+        </div>
+        <div class="keyboard-controls">
+          <button class="btn-add" id="btn-add-edit">+ Adicionar Edit</button>
+        </div>
+        <div class="edits-list" id="edits-list">
+          <div class="empty-state" id="edits-empty">
+            <span class="empty-icon">🎬</span>
+            <p>Nenhum edit configurado</p>
+            <p class="empty-sub">Clique em "+ Adicionar Edit" para começar</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: RANKING (CAMADAS) -->
+      <div class="tab-content" id="tab-ranking">
+        <div class="tab-header">
+          <h2>Camadas - Classificação</h2>
+          <p class="tab-desc">Rankings em tempo real de moedas e likes dos espectadores</p>
+        </div>
+        <div class="ranking-tabs">
+          <button class="ranking-tab active" data-ranking="coins">🪙 Moedas</button>
+          <button class="ranking-tab" data-ranking="likes">❤️ Likes</button>
+        </div>
+        <div class="ranking-controls">
+          <button class="btn-reset" id="btn-reset-ranking">Resetar Classificação</button>
+        </div>
+        <div class="ranking-content active" id="ranking-coins">
+          <div class="ranking-config-row">
+            <div class="ranking-bg-control">
+              <label>Fundo:</label>
+              <select id="coins-bg-select" class="form-input small-input">
+                <option value="transparent">Transparente</option>
+                <option value="#000000">Preto</option>
+                <option value="#1a1f2e">Azul Escuro</option>
+                <option value="#2d1b4e">Roxo</option>
+                <option value="#1b2e1b">Verde</option>
+              </select>
+            </div>
+            <div class="ranking-bg-control">
+              <label>Lado:</label>
+              <select id="coins-side-select" class="form-input small-input">
+                <option value="left">Esquerda</option>
+                <option value="right">Direita</option>
+              </select>
+            </div>
+          </div>
+          <div class="ranking-list" id="coins-ranking-list">
+            <div class="empty-state">
+              <span class="empty-icon">🪙</span>
+              <p>Nenhum dado ainda</p>
+              <p class="empty-sub">Conecte-se a uma live para ver o ranking de moedas</p>
+            </div>
+          </div>
+        </div>
+        <div class="ranking-content" id="ranking-likes">
+          <div class="ranking-config-row">
+            <div class="ranking-bg-control">
+              <label>Fundo:</label>
+              <select id="likes-bg-select" class="form-input small-input">
+                <option value="transparent">Transparente</option>
+                <option value="#000000">Preto</option>
+                <option value="#1a1f2e">Azul Escuro</option>
+                <option value="#2d1b4e">Roxo</option>
+                <option value="#1b2e1b">Verde</option>
+              </select>
+            </div>
+            <div class="ranking-bg-control">
+              <label>Lado:</label>
+              <select id="likes-side-select" class="form-input small-input">
+                <option value="left">Esquerda</option>
+                <option value="right">Direita</option>
+              </select>
+            </div>
+          </div>
+          <div class="ranking-list" id="likes-ranking-list">
+            <div class="empty-state">
+              <span class="empty-icon">❤️</span>
+              <p>Nenhum dado ainda</p>
+              <p class="empty-sub">Conecte-se a uma live para ver o ranking de likes</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: LINKS -->
+      <div class="tab-content" id="tab-links">
+        <div class="tab-header">
+          <h2>Links de Overlay</h2>
+          <p class="tab-desc">Copie os links abaixo e cole no TikTok Live Studio ou OBS</p>
+        </div>
+        <div class="links-section">
+          <!-- STATUS -->
+          <div class="relay-auto-status">
+            <div class="relay-status-dot" id="relay-status-dot"></div>
+            <span class="relay-status-text" id="relay-status-text">Conectando ao servidor...</span>
+          </div>
+
+          <!-- OVERLAY LINKS -->
+          <div id="overlay-links-container">
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🎬</span>
+                <div>
+                  <h4>Link Cena 1</h4>
+                  <p>Overlay de edits da Cena 1</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-edits1" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-edits1')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🎬</span>
+                <div>
+                  <h4>Link Cena 2</h4>
+                  <p>Overlay de edits da Cena 2</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-edits2" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-edits2')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🎬</span>
+                <div>
+                  <h4>Link Cena 3</h4>
+                  <p>Overlay de edits da Cena 3</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-edits3" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-edits3')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🪙</span>
+                <div>
+                  <h4>Ranking de Moedas</h4>
+                  <p>Mostra o ranking em tempo real de quem mais enviou moedas/presentes</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-coins" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-coins')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">❤️</span>
+                <div>
+                  <h4>Ranking de Likes</h4>
+                  <p>Mostra o ranking em tempo real de quem mais curtiu a live</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-likes" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-likes')">Copiar</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="link-instructions">
+            <h4>Como usar:</h4>
+            <ol>
+              <li>Copie o link desejado</li>
+              <li>No <strong>TikTok Live Studio</strong> ou <strong>OBS</strong>, adicione uma nova fonte</li>
+              <li>Escolha <strong>"Fonte de Navegador"</strong> (Browser Source)</li>
+              <li>Cole o link copiado no campo URL</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: ADD KEY MAPPING -->
+  <div class="modal-overlay" id="modal-key-map" style="display:none;">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h3>Novo Mapeamento de Tecla</h3>
+        <button class="modal-close" data-close="modal-key-map">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Selecione o Presente</label>
+          <div class="gift-search-row">
+            <input type="text" id="map-gift-search" placeholder="Buscar presente..." class="form-input">
+          </div>
+          <div class="gift-grid" id="map-gift-grid"></div>
+          <input type="hidden" id="map-gift-name">
+        </div>
+        <div class="form-group">
+          <label>Tecla a ser pressionada</label>
+          <div class="key-capture-box" id="key-capture-box" tabindex="0">
+            <span id="key-capture-text">Clique aqui e pressione uma tecla</span>
+          </div>
+          <input type="hidden" id="map-key-value">
+        </div>
+        <div class="form-group">
+          <label>Quantidade mínima de presentes</label>
+          <input type="number" id="map-gift-count" value="1" min="1" class="form-input small-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" data-close="modal-key-map">Cancelar</button>
+        <button class="btn-save" id="btn-save-key-map">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD EDIT -->
+  <div class="modal-overlay" id="modal-edit" style="display:none;">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h3>Novo Edit</h3>
+        <button class="modal-close" data-close="modal-edit">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Selecione o Presente</label>
+          <div class="gift-search-row">
+            <input type="text" id="edit-gift-search" placeholder="Buscar presente..." class="form-input">
+          </div>
+          <div class="gift-grid" id="edit-gift-grid"></div>
+          <input type="hidden" id="edit-gift-name">
+        </div>
+        <div class="form-group">
+          <label>Arquivo de Vídeo/GIF</label>
+          <div class="file-pick-row">
+            <input type="text" id="edit-file-path" placeholder="Selecione um arquivo..." class="form-input" readonly>
+            <button class="btn-browse" id="btn-browse-edit">Procurar</button>
+          </div>
+          <p class="form-hint">Formatos: .mp4, .webm, .gif, .avi, .mov</p>
+        </div>
+        <div class="form-group">
+          <label>Duração de exibição (segundos)</label>
+          <input type="number" id="edit-duration" value="5" min="1" max="60" class="form-input small-input">
+        </div>
+        <div class="form-group">
+          <label>Quantidade mínima de presentes</label>
+          <input type="number" id="edit-gift-count" value="1" min="1" class="form-input small-input">
+        </div>
+        <div class="form-group">
+          <label>Cena</label>
+          <select id="edit-scene" class="form-input small-input">
+            <option value="1">Cena 1</option>
+            <option value="2">Cena 2</option>
+            <option value="3">Cena 3</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" data-close="modal-edit">Cancelar</button>
+        <button class="btn-save" id="btn-save-edit">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: MODEL NAME -->
+  <div class="modal-overlay" id="modal-model" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-model-title">Novo Modelo</h3>
+        <button class="modal-close" data-close="modal-model">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nome do Modelo</label>
+          <input type="text" id="model-name-input" placeholder="Ex: Jogo do Mario, Subway Surfers..." class="form-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" data-close="modal-model">Cancelar</button>
+        <button class="btn-save" id="btn-save-model">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

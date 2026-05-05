@@ -56,6 +56,10 @@
         <span class="nav-icon">🔗</span>
         <span class="nav-label">Links</span>
       </button>
+      <button class="nav-btn" data-tab="chat">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">Chat</span>
+      </button>
       <div class="sidebar-spacer"></div>
       <div class="live-events" id="live-events-indicator" style="display:none;">
         <span class="pulse-dot"></span>
@@ -131,21 +135,35 @@
         <div class="ranking-tabs">
           <button class="ranking-tab active" data-ranking="coins">🪙 Moedas</button>
           <button class="ranking-tab" data-ranking="likes">❤️ Likes</button>
+          <button class="ranking-tab" data-ranking="points">⭐ Pontos</button>
+          <button class="ranking-tab" data-ranking="jar">🏺 Cofrinho</button>
+          <button class="ranking-tab" data-ranking="scoreboard">📊 Placar</button>
+          <button class="ranking-tab" data-ranking="timer">⏱️ Cronômetro</button>
+          <button class="ranking-tab" data-ranking="goals">🎯 Metas</button>
+          <button class="ranking-tab" data-ranking="membros">👥 Membros</button>
+          <button class="ranking-tab" data-ranking="top-score">🏆 Top</button>
+          <button class="ranking-tab" data-ranking="top-presentes">🎁 TOP PRESENTES</button>
         </div>
         <div class="ranking-controls">
-          <button class="btn-reset" id="btn-reset-ranking">Resetar Classificação</button>
         </div>
         <div class="ranking-content active" id="ranking-coins">
           <div class="ranking-config-row">
             <div class="ranking-bg-control">
-              <label>Fundo:</label>
-              <select id="coins-bg-select" class="form-input small-input">
-                <option value="transparent">Transparente</option>
-                <option value="#000000">Preto</option>
-                <option value="#1a1f2e">Azul Escuro</option>
-                <option value="#2d1b4e">Roxo</option>
-                <option value="#1b2e1b">Verde</option>
+              <label>Tema:</label>
+              <select id="coins-theme-select" class="form-input small-input">
+                <option value="clean">🔲 Limpo (Transparente)</option>
+                <option value="neon">⚡ Neon</option>
+                <option value="medieval">⚔️ Medieval</option>
+                <option value="retro">👾 Retro</option>
+                <option value="fire">🔥 Fogo</option>
+                <option value="ice">❄️ Gelo</option>
+                <option value="velho-oeste">🤠 Velho Oeste</option>
+                <option value="custom">🎨 Cor Personalizada</option>
               </select>
+            </div>
+            <div class="ranking-bg-control" id="coins-custom-color-wrap" style="display:none;">
+              <label>Cor:</label>
+              <input type="color" id="coins-custom-color" value="#1a1f2e" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
             </div>
             <div class="ranking-bg-control">
               <label>Lado:</label>
@@ -154,6 +172,9 @@
                 <option value="right">Direita</option>
               </select>
             </div>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn-reset" id="btn-reset-coins">🪙 Resetar Ranking de Moedas</button>
           </div>
           <div class="ranking-list" id="coins-ranking-list">
             <div class="empty-state">
@@ -166,14 +187,21 @@
         <div class="ranking-content" id="ranking-likes">
           <div class="ranking-config-row">
             <div class="ranking-bg-control">
-              <label>Fundo:</label>
-              <select id="likes-bg-select" class="form-input small-input">
-                <option value="transparent">Transparente</option>
-                <option value="#000000">Preto</option>
-                <option value="#1a1f2e">Azul Escuro</option>
-                <option value="#2d1b4e">Roxo</option>
-                <option value="#1b2e1b">Verde</option>
+              <label>Tema:</label>
+              <select id="likes-theme-select" class="form-input small-input">
+                <option value="clean">🔲 Limpo (Transparente)</option>
+                <option value="neon">⚡ Neon</option>
+                <option value="medieval">⚔️ Medieval</option>
+                <option value="retro">👾 Retro</option>
+                <option value="fire">🔥 Fogo</option>
+                <option value="ice">❄️ Gelo</option>
+                <option value="velho-oeste">🤠 Velho Oeste</option>
+                <option value="custom">🎨 Cor Personalizada</option>
               </select>
+            </div>
+            <div class="ranking-bg-control" id="likes-custom-color-wrap" style="display:none;">
+              <label>Cor:</label>
+              <input type="color" id="likes-custom-color" value="#1a1f2e" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
             </div>
             <div class="ranking-bg-control">
               <label>Lado:</label>
@@ -183,6 +211,9 @@
               </select>
             </div>
           </div>
+          <div style="margin-top:8px;">
+            <button class="btn-reset" id="btn-reset-likes">❤️ Resetar Ranking de Likes</button>
+          </div>
           <div class="ranking-list" id="likes-ranking-list">
             <div class="empty-state">
               <span class="empty-icon">❤️</span>
@@ -190,6 +221,643 @@
               <p class="empty-sub">Conecte-se a uma live para ver o ranking de likes</p>
             </div>
           </div>
+        </div>
+
+        <!-- ⭐ PONTOS -->
+        <div class="ranking-content" id="ranking-points">
+          <div class="ranking-config-row">
+            <div class="ranking-bg-control">
+              <label>Tema:</label>
+              <select id="points-theme-select" class="form-input small-input">
+                <option value="clean">🔲 Limpo (Transparente)</option>
+                <option value="neon">⚡ Neon</option>
+                <option value="medieval">⚔️ Medieval</option>
+                <option value="retro">👾 Retro</option>
+                <option value="fire">🔥 Fogo</option>
+                <option value="ice">❄️ Gelo</option>
+                <option value="royalty">👑 Royalty</option>
+                <option value="custom">🎨 Cor Personalizada</option>
+              </select>
+            </div>
+            <div class="ranking-bg-control" id="points-custom-color-wrap" style="display:none;">
+              <label>Cor fundo:</label>
+              <input type="color" id="points-custom-color" value="#1a1f2e" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+            </div>
+            <div class="ranking-bg-control">
+              <label>Lado:</label>
+              <select id="points-side-select" class="form-input small-input">
+                <option value="left">Esquerda</option>
+                <option value="right">Direita</option>
+              </select>
+            </div>
+          </div>
+          <div class="ranking-config-row" style="margin-top:8px; flex-wrap:wrap; gap:10px;">
+            <div class="ranking-bg-control">
+              <label>Nome da unidade:</label>
+              <input type="text" id="points-label-input" value="points" class="form-input small-input" style="width:100px;" placeholder="points">
+            </div>
+            <div class="ranking-bg-control">
+              <label>Cor do valor:</label>
+              <input type="color" id="points-value-color" value="#f1c40f" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+            </div>
+            <div class="ranking-bg-control">
+              <label>Cor da unidade:</label>
+              <input type="color" id="points-label-color" value="#aaaaaa" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+            </div>
+            <div class="ranking-bg-control">
+              <label>Cor do nome:</label>
+              <input type="color" id="points-name-color" value="#ffffff" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+            </div>
+            <div class="ranking-bg-control">
+              <label>Pontos por moeda:</label>
+              <input type="number" id="points-per-coin" value="1" min="0.01" step="0.01" class="form-input small-input" style="width:80px;">
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn-reset" id="btn-reset-points">⭐ Resetar Ranking de Pontos</button>
+          </div>
+          <div class="ranking-list" id="points-ranking-list">
+            <div class="empty-state">
+              <span class="empty-icon">⭐</span>
+              <p>Nenhum ponto ainda</p>
+              <p class="empty-sub">Pontos são acumulados conforme moedas enviadas na live</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ranking-content" id="ranking-jar">
+          <div class="jar-controls" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="ranking-bg-control">
+              <label>Tema:</label>
+              <select id="jar-theme-select" class="form-input small-input">
+                <option value="clean">🔲 Limpo</option>
+                <option value="neon">⚡ Neon</option>
+                <option value="medieval">⚔️ Medieval</option>
+                <option value="retro">👾 Retro</option>
+                <option value="fire">🔥 Fogo</option>
+                <option value="ice">❄️ Gelo</option>
+
+                <option value="custom">🎨 Cor Personalizada</option>
+              </select>
+            </div>
+            <div class="ranking-bg-control" id="jar-custom-color-wrap" style="display:none;">
+              <label>Cor:</label>
+              <input type="color" id="jar-custom-color" value="#1a1f2e" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+            </div>
+            <div class="ranking-bg-control">
+              <label>Capacidade:</label>
+              <select id="jar-capacity-select" class="form-input small-input">
+                <option value="500">500 presentes</option>
+                <option value="1000" selected>1.000 presentes</option>
+                <option value="2000">2.000 presentes</option>
+                <option value="5000">5.000 presentes</option>
+                <option value="10000">10.000 presentes</option>
+                <option value="20000">20.000 presentes</option>
+              </select>
+            </div>
+            <button class="btn-reset" id="btn-reset-jar">🔄 Resetar</button>
+          </div>
+          <!-- Jar preview -->
+          <div class="jar-preview-wrap" style="margin:12px 0;">
+            <div class="jar-preview-container" style="width:100%;max-width:480px;height:400px;margin:0 auto;position:relative;overflow:hidden;border-radius:12px;background:#0a0a12;border:1px solid var(--border);">
+              <iframe id="jar-preview-iframe" style="width:600px;height:600px;border:none;transform:scale(0.7);transform-origin:top center;position:absolute;left:50%;margin-left:-300px;top:-20px;" sandbox="allow-scripts allow-same-origin"></iframe>
+              <div style="position:absolute;bottom:8px;right:12px;color:rgba(255,255,255,0.4);font-size:11px;pointer-events:none;">
+                Total: <span id="jar-total-count" style="color:rgba(255,255,255,0.7);">0</span>
+              </div>
+            </div>
+          </div>
+          <!-- Test controls -->
+          <div class="jar-test-controls" style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:8px;">
+            <div class="ranking-bg-control">
+              <label>Presente:</label>
+              <select id="jar-test-gift" class="form-input small-input" style="min-width:160px;">
+              </select>
+            </div>
+            <div class="ranking-bg-control">
+              <label>Moedas:</label>
+              <input type="number" id="jar-test-coins" class="form-input small-input" value="1" min="1" style="width:80px;">
+            </div>
+            <div class="ranking-bg-control">
+              <label>Qtd:</label>
+              <input type="number" id="jar-test-count" class="form-input small-input" value="1" min="1" max="50" style="width:60px;">
+            </div>
+            <button class="btn-action" id="btn-jar-test" style="height:34px;">Testar</button>
+            <button class="btn-action" id="btn-jar-test-rain" style="height:34px;background:var(--accent-secondary);">Chuva x20</button>
+          </div>
+        </div>
+        <div class="ranking-content" id="ranking-scoreboard">
+          <div class="scoreboard-config">
+            <div class="form-group" style="display:flex;gap:12px;">
+              <div style="flex:1;">
+                <label>Nome Esquerda</label>
+                <input type="text" id="sb-left-name-input" value="Streamer" class="form-input" placeholder="Ex: Herói">
+              </div>
+              <div style="flex:1;">
+                <label>Nome Direita</label>
+                <input type="text" id="sb-right-name-input" value="Chat" class="form-input" placeholder="Ex: Vilão">
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div style="flex:1;min-width:120px;">
+                <label>Estilo</label>
+                <select id="sb-style-select" class="form-input small-input">
+                  <option value="default">📊 Padrão</option>
+                  <option value="premium">💎 Premium</option>
+                </select>
+              </div>
+              <div style="flex:2;min-width:160px;">
+                <label>Tema Visual</label>
+                <select id="sb-theme-select" class="form-input">
+                  <option value="neon">⚡ Neon (Azul & Rosa)</option>
+                  <option value="medieval">⚔️ Medieval (Dourado)</option>
+                  <option value="retro">👾 Retro/Arcade (Pixel)</option>
+                  <option value="fire">🔥 Fogo (Laranja)</option>
+                  <option value="ice">❄️ Gelo (Azul Claro)</option>
+                  <option value="custom">🎨 Cor Personalizada</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" id="sb-custom-color-wrap" style="display:none;">
+              <label>Cor de Fundo</label>
+              <input type="color" id="sb-custom-color" value="#1a1f2e" class="form-input" style="width:60px;height:35px;padding:2px;">
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:center;">
+              <button class="btn-model-connect" id="btn-scoreboard-toggle">Ativar Atalhos</button>
+              <button class="btn-reset" id="btn-scoreboard-reset">Resetar Placar</button>
+              <button class="btn-add" id="btn-scoreboard-save">Salvar Config</button>
+            </div>
+            <div class="scoreboard-preview" style="margin-top:12px;padding:16px;background:var(--bg-tertiary);border-radius:12px;text-align:center;">
+              <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Preview:</div>
+              <div style="font-size:24px;font-weight:900;color:var(--text-primary);">
+                <span id="sb-preview-left-name">Streamer</span>
+                <span id="sb-preview-left" style="color:#00d4ff;margin:0 4px;">0</span>
+                <span style="color:#ffd700;">VS</span>
+                <span id="sb-preview-right" style="color:#ff3366;margin:0 4px;">0</span>
+                <span id="sb-preview-right-name">Chat</span>
+              </div>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:8px;">
+                <strong>Ctrl+1</strong> = +1 esquerda &nbsp;|&nbsp; <strong>Ctrl+2</strong> = +1 direita &nbsp;|&nbsp; <strong>Ctrl+3</strong> = inverter &nbsp;|&nbsp; <strong>Ctrl+4</strong> = resetar
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ranking-content" id="ranking-timer">
+          <div class="timer-config">
+            <div class="timer-display-local">
+              <div id="timer-display" style="font-family:'Orbitron',monospace;font-size:48px;font-weight:900;color:#00d4ff;text-align:center;padding:20px 0;text-shadow:0 0 20px rgba(0,212,255,0.5);">00:00:00</div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+              <button class="btn-model-connect" id="btn-timer-toggle">▶ Iniciar</button>
+              <button class="btn-add" id="btn-timer-add-time">+ Adicionar Tempo</button>
+              <button class="btn-reset" id="btn-timer-reset">Resetar</button>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;">
+              <div style="flex:1;">
+                <label>Horas</label>
+                <input type="number" id="timer-hours" value="0" min="0" class="form-input small-input">
+              </div>
+              <div style="flex:1;">
+                <label>Minutos</label>
+                <input type="number" id="timer-minutes" value="0" min="0" max="59" class="form-input small-input">
+              </div>
+              <div style="flex:1;">
+                <label>Segundos</label>
+                <input type="number" id="timer-seconds" value="0" min="0" max="59" class="form-input small-input">
+              </div>
+              <button class="btn-add" id="btn-timer-set">Definir Tempo</button>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;">
+              <div style="flex:1;">
+                <label>Quantos segundos a cada moeda recebida?</label>
+                <input type="number" id="timer-coins-ratio" value="1" min="1" class="form-input small-input">
+                <p class="form-hint">Cada moeda do TikTok adiciona X segundos ao cronômetro</p>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Tema Visual</label>
+              <select id="timer-theme-select" class="form-input">
+                <option value="neon">⚡ Neon (Azul & Rosa)</option>
+                <option value="medieval">⚔️ Medieval (Dourado)</option>
+                <option value="retro">👾 Retro/Arcade (Pixel)</option>
+                <option value="fire">🔥 Fogo (Laranja)</option>
+                <option value="ice">❄️ Gelo (Azul Claro)</option>
+
+                <option value="custom">🎨 Cor Personalizada</option>
+              </select>
+            </div>
+            <div class="form-group" id="timer-custom-color-wrap" style="display:none;">
+              <label>Cor de Fundo</label>
+              <input type="color" id="timer-custom-color" value="#1a1f2e" class="form-input" style="width:60px;height:35px;padding:2px;">
+            </div>
+            <div class="form-group" style="background:var(--bg-tertiary);padding:16px;border-radius:12px;">
+              <h4 style="margin:0 0 12px;color:var(--accent-color);">🔗 LivePix (Opcional)</h4>
+              <div>
+                <label>Link LivePix Timer</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="timer-livepix-url" placeholder="https://widget.livepix.gg/embed/..." class="form-input">
+                  <button class="btn-add" id="btn-timer-livepix-connect">Conectar</button>
+                </div>
+                <div id="livepix-status" style="font-size:11px;color:var(--text-secondary);margin-top:4px;">Desconectado</div>
+              </div>
+            </div>
+            <button class="btn-add" id="btn-timer-save-config" style="width:100%;">💾 Salvar Configurações</button>
+          </div>
+        </div>
+        <div class="ranking-content" id="ranking-goals">
+          <!-- COIN GOAL -->
+          <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;margin-bottom:16px;">
+            <h4 style="margin:0 0 12px;color:var(--accent-color);">🪙 Meta de Moedas</h4>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div style="flex:2;min-width:150px;">
+                <label>Texto da Meta</label>
+                <input type="text" id="goal-coins-text" placeholder="Ex: Meu aniversário" class="form-input" value="">
+              </div>
+              <div style="flex:1;min-width:100px;">
+                <label>Valor da Meta</label>
+                <input type="number" id="goal-coins-target" value="2000" min="1" class="form-input">
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:8px;">
+              <div style="flex:1;min-width:120px;">
+                <label>Estilo</label>
+                <select id="goal-coins-style" class="form-input small-input">
+                  <option value="default">📊 Padrão</option>
+                  <option value="premium">💎 Premium</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:140px;">
+                <label>Tema Visual</label>
+                <select id="goal-coins-theme" class="form-input small-input">
+                  <option value="neon">⚡ Neon (Azul)</option>
+                  <option value="fire">🔥 Fogo</option>
+                  <option value="ice">❄️ Gelo</option>
+                  <option value="medieval">⚔️ Medieval</option>
+                  <option value="retro">👾 Retro</option>
+                  <option value="royalty">👑 Realeza</option>
+                  <option value="custom">🎨 Cor Personalizada</option>
+                </select>
+              </div>
+              <div id="goal-coins-custom-wrap" style="display:none;min-width:80px;">
+                <label>Cor:</label>
+                <input type="color" id="goal-coins-custom-color" value="#1a1f2e" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" id="goal-coins-double" style="width:18px;height:18px;">
+                Dobrar meta ao atingir
+              </label>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+              <div style="flex:1;background:var(--bg-secondary);padding:12px;border-radius:8px;text-align:center;">
+                <span style="font-size:13px;color:var(--text-secondary);">Progresso:</span>
+                <span id="goal-coins-progress" style="font-size:18px;font-weight:700;color:var(--accent-color);margin-left:8px;">0 / 2000</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn-add" id="btn-goal-coins-save" style="flex:1;">💾 Salvar Meta de Moedas</button>
+              <button class="btn-reset" id="btn-goal-coins-reset">Resetar</button>
+            </div>
+          </div>
+          <!-- LIKE GOAL -->
+          <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;">
+            <h4 style="margin:0 0 12px;color:#ff3366;">❤️ Meta de Likes</h4>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div style="flex:2;min-width:150px;">
+                <label>Texto da Meta</label>
+                <input type="text" id="goal-likes-text" placeholder="Ex: 10k curtidas!" class="form-input" value="">
+              </div>
+              <div style="flex:1;min-width:100px;">
+                <label>Valor da Meta</label>
+                <input type="number" id="goal-likes-target" value="5000" min="1" class="form-input">
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:8px;">
+              <div style="flex:1;min-width:120px;">
+                <label>Estilo</label>
+                <select id="goal-likes-style" class="form-input small-input">
+                  <option value="default">📊 Padrão</option>
+                  <option value="premium">💎 Premium</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:140px;">
+                <label>Tema Visual</label>
+                <select id="goal-likes-theme" class="form-input small-input">
+                  <option value="neon">⚡ Neon (Rosa)</option>
+                  <option value="fire">🔥 Fogo</option>
+                  <option value="ice">❄️ Gelo</option>
+                  <option value="medieval">⚔️ Medieval</option>
+                  <option value="retro">👾 Retro</option>
+                  <option value="royalty">👑 Realeza</option>
+                  <option value="custom">🎨 Cor Personalizada</option>
+                </select>
+              </div>
+              <div id="goal-likes-custom-wrap" style="display:none;min-width:80px;">
+                <label>Cor:</label>
+                <input type="color" id="goal-likes-custom-color" value="#1a1f2e" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" id="goal-likes-double" style="width:18px;height:18px;">
+                Dobrar meta ao atingir
+              </label>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+              <div style="flex:1;background:var(--bg-secondary);padding:12px;border-radius:8px;text-align:center;">
+                <span style="font-size:13px;color:var(--text-secondary);">Progresso:</span>
+                <span id="goal-likes-progress" style="font-size:18px;font-weight:700;color:#ff3366;margin-left:8px;">0 / 5000</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn-add" id="btn-goal-likes-save" style="flex:1;">💾 Salvar Meta de Likes</button>
+              <button class="btn-reset" id="btn-goal-likes-reset">Resetar</button>
+            </div>
+          </div>
+          <!-- PIX GOAL -->
+          <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;margin-top:16px;">
+            <h4 style="margin:0 0 12px;color:#22c55e;">💰 Meta de PIX (LivePix)</h4>
+            <div style="margin-bottom:10px;">
+              <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px;">Link do LivePix</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="goal-pix-livepix-url" placeholder="https://livepix.gg/seuusuario" class="form-input" style="flex:1;">
+                <button class="btn-add" id="btn-goal-pix-connect" style="white-space:nowrap;">🔗 Conectar</button>
+              </div>
+              <div id="goal-pix-livepix-status" style="font-size:11px;margin-top:4px;color:var(--text-secondary);"></div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div style="flex:2;min-width:150px;">
+                <label>Texto da Meta</label>
+                <input type="text" id="goal-pix-text" placeholder="Ex: Meta do PIX!" class="form-input" value="">
+              </div>
+              <div style="flex:1;min-width:100px;">
+                <label>Meta (R$)</label>
+                <input type="number" id="goal-pix-target" value="100" min="1" class="form-input">
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-top:8px;">
+              <div style="flex:1;min-width:120px;">
+                <label>Estilo</label>
+                <select id="goal-pix-style" class="form-input small-input">
+                  <option value="default">📊 Padrão</option>
+                  <option value="premium">💎 Premium</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:140px;">
+                <label>Tema Visual</label>
+                <select id="goal-pix-theme" class="form-input small-input">
+                  <option value="neon">⚡ Neon</option>
+                  <option value="fire">🔥 Fogo</option>
+                  <option value="ice">❄️ Gelo</option>
+                  <option value="medieval">⚔️ Medieval</option>
+                  <option value="retro">👾 Retro</option>
+                  <option value="royalty">👑 Realeza</option>
+                  <option value="custom">🎨 Cor Personalizada</option>
+                </select>
+              </div>
+              <div id="goal-pix-custom-wrap" style="display:none;min-width:80px;">
+                <label>Cor:</label>
+                <input type="color" id="goal-pix-custom-color" value="#1a1f2e" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+              </div>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" id="goal-pix-double" style="width:18px;height:18px;">
+                Dobrar meta ao atingir
+              </label>
+            </div>
+            <div class="form-group" style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+              <div style="flex:1;background:var(--bg-secondary);padding:12px;border-radius:8px;text-align:center;">
+                <span style="font-size:13px;color:var(--text-secondary);">Progresso:</span>
+                <span id="goal-pix-progress" style="font-size:18px;font-weight:700;color:#22c55e;margin-left:8px;">R$ 0 / R$ 100</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn-add" id="btn-goal-pix-save" style="flex:1;">💾 Salvar Meta de PIX</button>
+              <button class="btn-reset" id="btn-goal-pix-reset">Resetar</button>
+            </div>
+          </div>
+        </div>
+        <!-- TOP SCORE PANEL -->
+        <div class="ranking-content" id="ranking-top-score">
+          <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;">
+            <h4 style="margin:0 0 4px;color:#d4a020;">🏆 Top Pontuação — Velho Oeste</h4>
+            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Card individual em estilo Velho Oeste para destacar o top do momento.</p>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+              <div style="flex:1;min-width:120px;">
+                <label style="font-size:11px;color:var(--text-secondary);">Título</label>
+                <input type="text" id="ts-title" placeholder="TOP KILL" class="form-input" value="">
+              </div>
+              <div style="flex:1;min-width:120px;">
+                <label style="font-size:11px;color:var(--text-secondary);">Subtítulo (label do valor)</label>
+                <input type="text" id="ts-subtitle" placeholder="ELIMINAÇÕES" class="form-input" value="">
+              </div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <label style="font-size:11px;color:var(--text-secondary);">Desc (texto pequeno abaixo do título)</label>
+              <input type="text" id="ts-desc" placeholder="Recordista da Arena" class="form-input" value="">
+            </div>
+
+            <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;margin-bottom:10px;">
+              <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:6px;">@ do TikTok (busca foto e nome automaticamente)</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="ts-tiktok" placeholder="@username" class="form-input" style="flex:1;">
+                <button class="btn-add" id="btn-ts-fetch" style="white-space:nowrap;">🔍 Buscar</button>
+              </div>
+              <div id="ts-fetch-status" style="font-size:11px;margin-top:6px;color:var(--text-secondary);"></div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+              <div style="flex:2;min-width:140px;">
+                <label style="font-size:11px;color:var(--text-secondary);">Nome exibido</label>
+                <input type="text" id="ts-name" placeholder="Nome da pessoa" class="form-input" value="">
+              </div>
+              <div style="flex:1;min-width:80px;">
+                <label style="font-size:11px;color:var(--text-secondary);">Valor</label>
+                <input type="number" id="ts-valor" placeholder="2307" class="form-input" value="0" min="0">
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px;color:var(--text-secondary);">URL da foto (preenchida automaticamente ao buscar)</label>
+              <input type="text" id="ts-avatar" placeholder="https://..." class="form-input" value="">
+            </div>
+
+            <button class="btn-add" id="btn-ts-save" style="width:100%;">💾 Salvar e Enviar ao Overlay</button>
+          </div>
+        </div>
+
+        <!-- TOP PRESENTES PANEL -->
+        <div class="ranking-content" id="ranking-top-presentes">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+
+            <!-- MAIOR PRESENTE -->
+            <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;">
+              <h4 style="margin:0 0 12px;color:#f59e0b;">🏆 Maior Presente</h4>
+
+              <!-- Label + cor do label -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <input type="text" id="tg-label" placeholder="Maior Presente" class="form-input" style="flex:1;" value="Maior Presente">
+                <label style="font-size:11px;color:var(--text-secondary);white-space:nowrap;">Cor:</label>
+                <input type="color" id="tg-label-color" value="#ffffff" style="width:36px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <!-- Cor do nome -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:13px;color:var(--text-secondary);white-space:nowrap;min-width:90px;">Cor do nome:</label>
+                <input type="color" id="tg-name-color" value="#FFD700" style="width:36px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <!-- Cor do valor -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <label style="font-size:13px;color:var(--text-secondary);white-space:nowrap;min-width:90px;">Cor do valor:</label>
+                <input type="color" id="tg-value-color" value="#ffffff" style="width:36px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <button class="btn-add" id="btn-tg-save" style="flex:1;">✔ Aplicar</button>
+                <button class="btn-reset" id="btn-tg-reset">🗑️ Resetar</button>
+              </div>
+
+              <!-- Display atual -->
+              <div style="background:var(--bg-secondary);padding:10px 14px;border-radius:8px;">
+                <div id="tp-gift-display" style="font-size:13px;color:#f59e0b;font-weight:700;">—</div>
+                <div id="tp-gift-sender" style="font-size:11px;color:var(--text-secondary);">Aguardando...</div>
+              </div>
+            </div>
+
+            <!-- MAIOR COMBO -->
+            <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;">
+              <h4 style="margin:0 0 12px;color:#ef4444;">🔥 Maior Combo</h4>
+
+              <!-- Label + cor do label -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <input type="text" id="tc-label" placeholder="Maior Combo" class="form-input" style="flex:1;" value="Maior Combo">
+                <label style="font-size:11px;color:var(--text-secondary);white-space:nowrap;">Cor:</label>
+                <input type="color" id="tc-label-color" value="#ffffff" style="width:36px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <!-- Cor do nome -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:13px;color:var(--text-secondary);white-space:nowrap;min-width:90px;">Cor do nome:</label>
+                <input type="color" id="tc-name-color" value="#FFD700" style="width:36px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <!-- Cor do combo -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <label style="font-size:13px;color:var(--text-secondary);white-space:nowrap;min-width:90px;">Cor do combo:</label>
+                <input type="color" id="tc-combo-color" value="#ff6464" style="width:36px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <button class="btn-add" id="btn-tc-save" style="flex:1;">✔ Aplicar</button>
+                <button class="btn-reset" id="btn-tc-reset">🗑️ Resetar</button>
+              </div>
+
+              <!-- Display atual -->
+              <div style="background:var(--bg-secondary);padding:10px 14px;border-radius:8px;">
+                <div id="tp-combo-display" style="font-size:13px;color:#ef4444;font-weight:700;">—</div>
+                <div id="tp-combo-sender" style="font-size:11px;color:var(--text-secondary);">Aguardando...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEMBROS PANEL -->
+        <div class="ranking-content" id="ranking-membros">
+          <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;">
+            <h4 style="margin:0 0 4px;color:var(--accent-color);">👥 Membros da Live</h4>
+            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Quem enviar o presente <strong>Heart Me</strong> aparece no overlay rolando da direita pra esquerda durante toda a live.</p>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Título do overlay</label>
+              <input type="text" id="membros-title-input" placeholder="Ex: Integrantes da Gangue" class="form-input" value="">
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:14px;">
+              <button class="btn-add" id="btn-membros-save" style="flex:1;">💾 Salvar Título</button>
+              <button class="btn-reset" id="btn-membros-reset">🗑️ Limpar Membros</button>
+            </div>
+
+            <!-- Adicionar membro manualmente -->
+            <div style="background:var(--bg-secondary);padding:12px 14px;border-radius:8px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.07);">
+              <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">➕ <strong style="color:var(--text-primary);">Adicionar membro manualmente</strong> — útil quando um bug ocorre ou a pessoa enviou o Heart Me fora do horário.</p>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="text" id="membros-manual-input" class="form-input" placeholder="@usuario ou usuario" style="flex:1;"/>
+                <button class="btn-add" id="btn-membros-add-manual" style="white-space:nowrap;">➕ Adicionar</button>
+              </div>
+              <div id="membros-manual-status" style="font-size:12px;margin-top:6px;min-height:16px;color:var(--text-secondary);"></div>
+            </div>
+
+            <div style="background:var(--bg-secondary);padding:10px 14px;border-radius:8px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:13px;color:var(--text-secondary);">Membros na live:</span>
+              <span id="membros-count" style="font-size:18px;font-weight:700;color:var(--accent-color);">0</span>
+            </div>
+          </div>
+
+          <!-- ══ MEMBROS AÇÃO ══ -->
+          <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;margin-top:16px;border:1px solid rgba(255,180,0,0.15);">
+            <h4 style="margin:0 0 4px;color:#f59e0b;">⚡ Membros Ação</h4>
+            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Overlay separado que é ativado por <strong>qualquer presente que você escolher</strong> — não precisa ser o Heart Me.</p>
+
+            <div class="form-group" style="margin-bottom:10px;">
+              <label>Título do overlay</label>
+              <input type="text" id="membros-acao-title-input" placeholder="Ex: Membros Ação" class="form-input" value="Membros Ação">
+            </div>
+
+            <div class="form-group" style="margin-bottom:10px;">
+              <label>Presente que ativa o overlay</label>
+              <select id="membros-acao-gift-select" class="form-input">
+                <!-- populado pelo JS via TIKTOK_GIFTS -->
+              </select>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:140px;margin-bottom:0;">
+                <label>Texto abaixo do nome <span style="opacity:.5;">(opcional)</span></label>
+                <input type="text" id="membros-acao-subtext" class="form-input" placeholder="Ex: Kill, Nível, Equipe...">
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+              <div class="form-group" style="width:140px;margin-bottom:0;">
+                <label>Tamanho do texto <span style="opacity:.5;">(px)</span></label>
+                <input type="number" id="membros-acao-subtext-size" class="form-input small-input" value="9" min="6" max="40" style="width:80px;">
+              </div>
+              <div class="form-group" style="width:140px;margin-bottom:0;">
+                <label>Tamanho do valor <span style="opacity:.5;">(px)</span></label>
+                <input type="number" id="membros-acao-subvalue-size" class="form-input small-input" value="9" min="6" max="40" style="width:80px;">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Cor do texto</label>
+                <input type="color" id="membros-acao-subtext-color" value="#ffdc50" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label>Cor do valor</label>
+                <input type="color" id="membros-acao-subvalue-color" value="#ffdc50" class="form-input small-input" style="width:50px;height:32px;padding:2px;">
+              </div>
+            </div>
+            <p style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">💡 Deixe o texto e o valor em branco para o overlay ficar igual ao de Membros da Live.</p>
+
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <button class="btn-add" id="btn-membros-acao-save" style="flex:1;">💾 Salvar configuração</button>
+              <button class="btn-reset" id="btn-membros-acao-reset">🗑️ Limpar</button>
+            </div>
+
+            <!-- Adicionar membro ação manualmente -->
+            <div style="background:var(--bg-secondary);padding:12px 14px;border-radius:8px;margin-bottom:12px;border:1px solid rgba(255,180,0,0.12);">
+              <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px;">➕ <strong style="color:var(--text-primary);">Adicionar manualmente</strong> — se o usuário já estiver no overlay, o valor será somado ao que já tem.</p>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input type="text" id="membros-acao-manual-input" class="form-input" placeholder="@usuario ou usuario" style="flex:1;"/>
+                <input type="number" id="membros-acao-manual-value" class="form-input" placeholder="Valor" min="0" step="1" style="width:80px;" title="Valor (opcional)">
+                <button class="btn-add" id="btn-membros-acao-add-manual" style="white-space:nowrap;">➕ Adicionar</button>
+              </div>
+              <div id="membros-acao-manual-status" style="font-size:12px;margin-top:6px;min-height:16px;color:var(--text-secondary);"></div>
+            </div>
+
+            <div style="background:var(--bg-secondary);padding:10px 14px;border-radius:8px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:13px;color:var(--text-secondary);">Membros Ação na live:</span>
+              <span id="membros-acao-count" style="font-size:18px;font-weight:700;color:#f59e0b;">0</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -273,6 +941,162 @@
                 <button class="btn-copy" onclick="copyLink('link-likes')">Copiar</button>
               </div>
             </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">⭐</span>
+                <div>
+                  <h4>Classificação de Pontos</h4>
+                  <p>Ranking de pontos acumulados — nunca reseta sozinho</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-points" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-points')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">📊</span>
+                <div>
+                  <h4>Placar</h4>
+                  <p>Placar interativo com atalhos Alt+1/2/3/4</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-scoreboard" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-scoreboard')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">⏱️</span>
+                <div>
+                  <h4>Cronômetro</h4>
+                  <p>Timer de contagem regressiva para live</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-timer" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-timer')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🎯</span>
+                <div>
+                  <h4>Meta de Moedas</h4>
+                  <p>Barra de progresso da meta de moedas</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-goal-coins" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-goal-coins')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🎯</span>
+                <div>
+                  <h4>Meta de Likes</h4>
+                  <p>Barra de progresso da meta de likes</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-goal-likes" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-goal-likes')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🏆</span>
+                <div>
+                  <h4>Top Pontuação</h4>
+                  <p>Card Velho Oeste com o destaque do momento</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-top-score" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-top-score')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">💰</span>
+                <div>
+                  <h4>Meta de PIX</h4>
+                  <p>Barra de progresso sincronizada com o LivePix em tempo real</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-goal-pix" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-goal-pix')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🏆</span>
+                <div>
+                  <h4>Maior Presente</h4>
+                  <p>Exibe o presente mais valioso recebido na live com animação</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-top-gift" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-top-gift')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🔥</span>
+                <div>
+                  <h4>Maior Combo</h4>
+                  <p>Exibe o maior combo de presente enviado na live</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-top-combo" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-top-combo')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">👥</span>
+                <div>
+                  <h4>Membros</h4>
+                  <p>Ticker com quem enviou Heart Me rolando da direita pra esquerda</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-membros" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-membros')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">⚡</span>
+                <div>
+                  <h4>Membros Ação</h4>
+                  <p>Ticker ativado pelo presente que você escolher — com texto personalizado</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-membros-acao" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-membros-acao')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🏺</span>
+                <div>
+                  <h4>Cofrinho</h4>
+                  <p>Pote que enche com os presentes da live em tempo real</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-jar" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-jar')">Copiar</button>
+              </div>
+            </div>
           </div>
 
           <div class="link-instructions">
@@ -283,6 +1107,142 @@
               <li>Escolha <strong>"Fonte de Navegador"</strong> (Browser Source)</li>
               <li>Cole o link copiado no campo URL</li>
             </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: CHAT -->
+      <div class="tab-content" id="tab-chat">
+        <div class="tab-header">
+          <h2>Chat Unificado</h2>
+          <p class="tab-desc">Conecte múltiplas plataformas e veja todos os chats em um só lugar</p>
+        </div>
+
+        <!-- Platform cards -->
+        <div style="display:flex;flex-direction:column;gap:10px;">
+
+          <!-- TikTok -->
+          <div style="background:var(--bg-tertiary);padding:14px 16px;border-radius:12px;border-left:3px solid #ff2d55;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+              <span style="font-size:18px;">🎵</span>
+              <span style="font-weight:700;font-size:14px;">TikTok</span>
+              <span id="chat-status-tiktok" style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);margin-left:auto;">Desconectado</span>
+            </div>
+            <p style="font-size:11px;color:var(--text-secondary);margin:0;">Automático — usa a conexão TikTok ativa acima.</p>
+          </div>
+
+          <!-- Twitch -->
+          <div style="background:var(--bg-tertiary);padding:14px 16px;border-radius:12px;border-left:3px solid #9146ff;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:18px;">📺</span>
+              <span style="font-weight:700;font-size:14px;">Twitch</span>
+              <span id="chat-status-twitch" style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);margin-left:auto;">Desconectado</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="chat-twitch-channel" placeholder="nome do canal (sem #)" class="form-input" style="flex:1;">
+              <button class="btn-add" id="btn-twitch-connect" style="white-space:nowrap;">Conectar</button>
+            </div>
+          </div>
+
+          <!-- Kick -->
+          <div style="background:var(--bg-tertiary);padding:14px 16px;border-radius:12px;border-left:3px solid #53fc18;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:18px;">🦵</span>
+              <span style="font-weight:700;font-size:14px;">Kick</span>
+              <span id="chat-status-kick" style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);margin-left:auto;">Desconectado</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="chat-kick-channel" placeholder="nome do canal" class="form-input" style="flex:1;">
+              <button class="btn-add" id="btn-kick-connect" style="white-space:nowrap;">Conectar</button>
+            </div>
+          </div>
+
+          <!-- YouTube -->
+          <div style="background:var(--bg-tertiary);padding:14px 16px;border-radius:12px;border-left:3px solid #ff4444;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:18px;">▶️</span>
+              <span style="font-weight:700;font-size:14px;">YouTube</span>
+              <span id="chat-status-youtube" style="font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.4);margin-left:auto;">Desconectado</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="chat-youtube-channel" placeholder="@seucanal ou nome do canal" class="form-input" style="flex:1;">
+              <button class="btn-add" id="btn-youtube-connect" style="white-space:nowrap;">Conectar</button>
+            </div>
+            <p style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:6px;">O canal precisa estar em live no momento da conexão.</p>
+          </div>
+
+        </div>
+
+        <!-- Event Notifications -->
+        <div style="background:var(--bg-tertiary);border-radius:12px;padding:14px 16px;margin:12px 0 0;">
+          <div style="font-weight:700;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+            <span>⚡</span> Notificações de Eventos
+          </div>
+          <p style="font-size:11px;color:var(--text-secondary);margin-bottom:12px;">Ative para exibir no chat quando cada evento acontecer.</p>
+
+          <!-- TikTok events -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:#ff2d55;margin-bottom:6px;letter-spacing:0.5px;">🎵 TikTok</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <label class="evt-cb"><input type="checkbox" data-platform="tiktok" data-event="follow" checked> Seguiu / Followed</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="tiktok" data-event="gift" checked> Presente / Gift</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="tiktok" data-event="subscribe" checked> Inscrito / Subscribed</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="tiktok" data-event="share"> Compartilhou / Shared</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="tiktok" data-event="member"> Entrou / Joined</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="tiktok" data-event="like"> Curtiu / Liked</label>
+            </div>
+          </div>
+
+          <!-- Twitch events -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:#9146ff;margin-bottom:6px;letter-spacing:0.5px;">📺 Twitch</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <label class="evt-cb"><input type="checkbox" data-platform="twitch" data-event="sub" checked> Inscrito / Sub</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="twitch" data-event="giftsub" checked> Sub Presente / Gift Sub</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="twitch" data-event="raid" checked> Raid</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="twitch" data-event="bits"> Bits / Cheers</label>
+            </div>
+          </div>
+
+          <!-- Kick events -->
+          <div style="margin-bottom:10px;">
+            <div style="font-size:10px;font-weight:700;color:#53fc18;margin-bottom:6px;letter-spacing:0.5px;">🦵 Kick</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <label class="evt-cb"><input type="checkbox" data-platform="kick" data-event="follow" checked> Seguiu / Followed</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="kick" data-event="subscribe" checked> Inscrito / Subscribed</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="kick" data-event="giftsub" checked> Sub Presente / Gift Sub</label>
+            </div>
+          </div>
+
+          <!-- YouTube events -->
+          <div>
+            <div style="font-size:10px;font-weight:700;color:#ff4444;margin-bottom:6px;letter-spacing:0.5px;">▶️ YouTube</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <label class="evt-cb"><input type="checkbox" data-platform="youtube" data-event="superchat" checked> Super Chat</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="youtube" data-event="membership" checked> Membro / Member</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="youtube" data-event="subscribe" checked> Inscrito / Subscribed</label>
+              <label class="evt-cb"><input type="checkbox" data-platform="youtube" data-event="like" checked> Curtiu / Liked</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:8px;margin:14px 0 10px;">
+          <button class="btn-add" id="btn-open-chat-window" style="flex:1;">🪟 Abrir em Janela Separada</button>
+          <button class="btn-reset" id="btn-clear-chat">🗑️ Limpar Chat</button>
+        </div>
+
+        <!-- Inline chat preview -->
+        <div style="background:var(--bg-tertiary);border-radius:12px;overflow:hidden;">
+          <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.06);font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center;">
+            <span>Mensagens recentes</span>
+            <span id="chat-inline-count" style="color:rgba(255,255,255,0.3);">0</span>
+          </div>
+          <div id="chat-inline-msgs" style="height:280px;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:2px;">
+            <div id="chat-inline-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,0.2);font-size:12px;gap:8px;">
+              <span style="font-size:28px;">💬</span>
+              <span>Nenhuma mensagem ainda</span>
+            </div>
           </div>
         </div>
       </div>
@@ -356,6 +1316,11 @@
         <div class="form-group">
           <label>Quantidade mínima de presentes</label>
           <input type="number" id="edit-gift-count" value="1" min="1" class="form-input small-input">
+        </div>
+        <div class="form-group">
+          <label>Volume (%)</label>
+          <input type="range" id="edit-volume" min="0" max="100" value="100" style="width:100%;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);"><span>0%</span><span id="edit-volume-label">100%</span><span>100%</span></div>
         </div>
         <div class="form-group">
           <label>Cena</label>

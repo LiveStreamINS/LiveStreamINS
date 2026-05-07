@@ -1613,7 +1613,30 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
         showToast(`✅ ${nickname} adicionado aos Membros Ação!`, 'success');
       }
     } catch (e) {
-      if (acaoManualStatus) { acaoManualStatus.style.color = '#ef4444'; acaoManualStatus.textContent = '❌ Erro ao buscar perfil. Verifique o nome de usuário.'; }
+      // Profile fetch failed (network/timeout) — add member anyway without photo
+      const userId   = username;
+      const nickname = username;
+      const profilePictureUrl = '';
+      const existing = membrosAcaoMembers.find(m => m.userId === userId);
+      if (existing) {
+        existing.value = (existing.value || 0) + valueToAdd;
+        existing.nickname = nickname || existing.nickname;
+        saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
+        ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
+        if (acaoManualInput) acaoManualInput.value = '';
+        if (acaoManualValInput) acaoManualValInput.value = '';
+        if (acaoManualStatus) { acaoManualStatus.style.color = '#f59e0b'; acaoManualStatus.textContent = `⚠️ ${nickname} atualizado (sem foto — erro de rede).`; }
+        showToast(`✅ ${nickname} atualizado!`, 'success');
+      } else {
+        membrosAcaoMembers.push({ userId, nickname, profilePictureUrl, value: valueToAdd });
+        saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
+        ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
+        if (countEl) countEl.textContent = membrosAcaoMembers.length;
+        if (acaoManualInput) acaoManualInput.value = '';
+        if (acaoManualValInput) acaoManualValInput.value = '';
+        if (acaoManualStatus) { acaoManualStatus.style.color = '#f59e0b'; acaoManualStatus.textContent = `⚠️ @${username} adicionado (sem foto — erro de rede).`; }
+        showToast(`✅ @${username} adicionado aos Membros Ação!`, 'success');
+      }
     }
 
     if (btnAcaoManual) btnAcaoManual.disabled = false;

@@ -2052,8 +2052,9 @@ ipcRenderer.on('relay-status', (event, data) => {
       ipcRenderer.send('update-points-ranking', pointsRanking);
     }
     ipcRenderer.send('update-points-config', pointsConfig);
-    // Re-send Membros Ação
+    // Re-send Membros Ação — reset first so accumulated totals don't get double-added on reconnect
     ipcRenderer.send('membros-acao-config', membrosAcaoConfig);
+    ipcRenderer.send('membros-acao-reset');
     membrosAcaoMembers.forEach(m => ipcRenderer.send('membros-acao-add', m));
     // Re-send persistent membros state after relay reconnects
     if (membrosMembers.length > 0) {

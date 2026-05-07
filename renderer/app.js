@@ -2011,6 +2011,70 @@ if (btnResetPoints) {
   });
 }
 
+// ── Adicionar / subtrair pontos manualmente ──
+const btnAddPointsToggle   = document.getElementById('btn-add-points-toggle');
+const addPointsRow         = document.getElementById('add-points-row');
+const addPointsStatus      = document.getElementById('add-points-status');
+const addPointsUsername    = document.getElementById('add-points-username');
+const addPointsValue       = document.getElementById('add-points-value');
+const btnAddPointsValidate = document.getElementById('btn-add-points-validate');
+
+if (btnAddPointsToggle) {
+  btnAddPointsToggle.addEventListener('click', () => {
+    const visible = addPointsRow.style.display === 'flex';
+    addPointsRow.style.display    = visible ? 'none' : 'flex';
+    addPointsStatus.style.display = visible ? 'none' : 'block';
+    if (!visible && addPointsUsername) addPointsUsername.focus();
+  });
+}
+
+async function validateAddPoints() {
+  const raw = (addPointsUsername ? addPointsUsername.value : '').trim();
+  if (!raw) { addPointsStatus.style.color = '#ef4444'; addPointsStatus.textContent = '❌ Digite o nome de usuário.'; return; }
+  const username  = raw.replace(/^@/, '');
+  const valueToAdd = addPointsValue ? (parseFloat(addPointsValue.value) || 0) : 0;
+  if (valueToAdd === 0) { addPointsStatus.style.color = '#ef4444'; addPointsStatus.textContent = '❌ Digite a quantidade de pontos.'; return; }
+
+  addPointsStatus.style.color = '#aaa';
+  addPointsStatus.textContent = '🔍 Buscando perfil...';
+  if (btnAddPointsValidate) btnAddPointsValidate.disabled = true;
+
+  try {
+    const result = await ipcRenderer.invoke('fetch-tiktok-profile', username);
+    if (!result.ok || !result.userId) throw new Error('not found');
+
+    const { userId, nickname, profilePictureUrl } = result;
+    if (!pointsRanking[userId]) {
+      pointsRanking[userId] = { nickname, profilePictureUrl, points: 0 };
+    }
+    pointsRanking[userId].points    = (pointsRanking[userId].points || 0) + valueToAdd;
+    pointsRanking[userId].nickname  = nickname;
+    if (profilePictureUrl) pointsRanking[userId].profilePictureUrl = profilePictureUrl;
+
+    // Remove entry if points reach 0 or below
+    if (pointsRanking[userId].points <= 0) delete pointsRanking[userId];
+
+    saveToStorage('pointsRanking', pointsRanking);
+    renderPointsRanking();
+    ipcRenderer.send('update-points-ranking', pointsRanking);
+
+    const action = valueToAdd > 0 ? `+${valueToAdd}` : `${valueToAdd}`;
+    addPointsStatus.style.color = '#22c55e';
+    addPointsStatus.textContent = `✅ ${nickname} — ${action} pontos aplicado!`;
+    if (addPointsUsername) addPointsUsername.value = '';
+    if (addPointsValue)    addPointsValue.value    = '';
+    showToast(`✅ ${nickname}: ${action} pontos`, 'success');
+  } catch (e) {
+    addPointsStatus.style.color = '#ef4444';
+    addPointsStatus.textContent = '❌ Perfil não encontrado. Verifique o @ e tente novamente.';
+  }
+
+  if (btnAddPointsValidate) btnAddPointsValidate.disabled = false;
+}
+
+if (btnAddPointsValidate) btnAddPointsValidate.addEventListener('click', validateAddPoints);
+if (addPointsValue) addPointsValue.addEventListener('keydown', e => { if (e.key === 'Enter') validateAddPoints(); });
+
 renderPointsRanking();
 
 // ============================================

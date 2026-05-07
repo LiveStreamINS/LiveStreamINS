@@ -273,9 +273,16 @@
               <input type="number" id="points-per-coin" value="1" min="0.01" step="0.01" class="form-input small-input" style="width:80px;">
             </div>
           </div>
-          <div style="margin-top:8px;">
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
             <button class="btn-reset" id="btn-reset-points">⭐ Resetar Ranking de Pontos</button>
+            <button class="btn-add" id="btn-add-points-toggle">➕ Adicionar Pontos</button>
           </div>
+          <div id="add-points-row" style="display:none;margin-top:8px;display:none;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="add-points-username" class="form-input" placeholder="Digite nome de usuário" style="flex:1;min-width:160px;">
+            <input type="number" id="add-points-value" class="form-input" placeholder="Quantidade de pontos" step="1" style="width:160px;" title="Negativo para subtrair">
+            <button class="btn-add" id="btn-add-points-validate" style="white-space:nowrap;">✅ Validar</button>
+          </div>
+          <div id="add-points-status" style="font-size:12px;margin-top:4px;min-height:16px;color:#aaa;display:none;"></div>
           <div class="ranking-list" id="points-ranking-list">
             <div class="empty-state">
               <span class="empty-icon">⭐</span>

@@ -18,7 +18,7 @@ let pointsPerCoin = loadFromStorage('pointsPerCoin', 1);
 
 // Membros Ação state
 let membrosAcaoMembers = loadFromStorage('membrosAcaoMembers', []);
-let membrosAcaoConfig  = loadFromStorage('membrosAcaoConfig', { title: 'Membros Ação', giftName: 'Heart Me', giftImage: '', subText: '', subTextSize: 9, subValueSize: 9, subTextColor: '#ffdc50', subValueColor: '#ffdc50' });
+let membrosAcaoConfig  = loadFromStorage('membrosAcaoConfig', { title: 'Membros Ação', giftName: 'Heart Me', giftImage: '', subText: '', subTextSize: 9, subValueSize: 9, subTextColor: '#ffdc50', subValueColor: '#ffdc50', nameFont: '', subTextFont: '', valueFont: '' });
 let pointsConfig = loadFromStorage('pointsConfig', { label: 'points', valueColor: '#f1c40f', labelColor: '#aaaaaa', nameColor: '#ffffff', theme: 'clean', side: 'left', customColor: '#1a1f2e' });
 let coinsBg = loadFromStorage('coinsBg', 'transparent');
 let coinsSide = loadFromStorage('coinsSide', 'left');
@@ -39,6 +39,7 @@ let topScore = loadFromStorage('topScore', { title: '', desc: '', subtitle: '', 
 
 // Membros state
 let membrosTitle = loadFromStorage('membrosTitle', 'Membros');
+let membrosNameFont = loadFromStorage('membrosNameFont', '');
 let membrosMembers = loadFromStorage('membrosMembers', []); // [{userId, nickname, profilePictureUrl}]
 
 // Top Presentes state
@@ -1412,20 +1413,25 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
 })();
 
 (function initMembros() {
-  const titleInput = document.getElementById('membros-title-input');
-  const countEl = document.getElementById('membros-count');
-  if (titleInput) titleInput.value = membrosTitle;
-  if (countEl) countEl.textContent = membrosMembers.length;
+  const titleInput  = document.getElementById('membros-title-input');
+  const nameFontSel = document.getElementById('membros-name-font');
+  const countEl     = document.getElementById('membros-count');
+  if (titleInput)  titleInput.value  = membrosTitle;
+  if (nameFontSel) nameFontSel.value = membrosNameFont;
+  if (countEl)     countEl.textContent = membrosMembers.length;
 
   // Members are re-sent when relay connects (see relay-status handler below)
 
   const btnSave = document.getElementById('btn-membros-save');
   if (btnSave) {
     btnSave.addEventListener('click', () => {
-      const title = (titleInput ? titleInput.value.trim() : '') || 'Membros';
-      membrosTitle = title;
-      saveToStorage('membrosTitle', membrosTitle);
-      ipcRenderer.send('membros-title', { title });
+      const title    = (titleInput  ? titleInput.value.trim()  : '') || 'Membros';
+      const nameFont = nameFontSel  ? nameFontSel.value        : '';
+      membrosTitle    = title;
+      membrosNameFont = nameFont;
+      saveToStorage('membrosTitle',    membrosTitle);
+      saveToStorage('membrosNameFont', membrosNameFont);
+      ipcRenderer.send('membros-title', { title, nameFont });
       showToast('Título de membros salvo!', 'success');
     });
   }
@@ -1503,6 +1509,9 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   const subValSizeInput   = document.getElementById('membros-acao-subvalue-size');
   const subTextColorInput = document.getElementById('membros-acao-subtext-color');
   const subValColorInput  = document.getElementById('membros-acao-subvalue-color');
+  const subTextFontSel    = document.getElementById('membros-acao-subtext-font');
+  const valueFontSel      = document.getElementById('membros-acao-value-font');
+  const nameFontSel       = document.getElementById('membros-acao-name-font');
   const acaoManualValInput = document.getElementById('membros-acao-manual-value');
   const countEl          = document.getElementById('membros-acao-count');
   const btnSave          = document.getElementById('btn-membros-acao-save');
@@ -1514,6 +1523,9 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   if (subValSizeInput)   subValSizeInput.value   = membrosAcaoConfig.subValueSize  || 9;
   if (subTextColorInput) subTextColorInput.value = membrosAcaoConfig.subTextColor  || '#ffdc50';
   if (subValColorInput)  subValColorInput.value  = membrosAcaoConfig.subValueColor || '#ffdc50';
+  if (subTextFontSel)   subTextFontSel.value    = membrosAcaoConfig.subTextFont    || '';
+  if (valueFontSel)     valueFontSel.value      = membrosAcaoConfig.valueFont      || '';
+  if (nameFontSel)      nameFontSel.value       = membrosAcaoConfig.nameFont       || '';
   if (countEl)          countEl.textContent    = membrosAcaoMembers.length;
 
   // Populate gift list from TIKTOK_GIFTS
@@ -1545,7 +1557,10 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
       subTextSize:  subTextSizeInput ? Number(subTextSizeInput.value)  || 9          : membrosAcaoConfig.subTextSize,
       subValueSize: subValSizeInput  ? Number(subValSizeInput.value)   || 9          : membrosAcaoConfig.subValueSize,
       subTextColor: subTextColorInput ? subTextColorInput.value || '#ffdc50'         : membrosAcaoConfig.subTextColor,
-      subValueColor:subValColorInput  ? subValColorInput.value  || '#ffdc50'         : membrosAcaoConfig.subValueColor
+      subValueColor:subValColorInput  ? subValColorInput.value  || '#ffdc50'         : membrosAcaoConfig.subValueColor,
+      subTextFont:  subTextFontSel   ? subTextFontSel.value                          : membrosAcaoConfig.subTextFont,
+      valueFont:    valueFontSel     ? valueFontSel.value                            : membrosAcaoConfig.valueFont,
+      nameFont:     nameFontSel      ? nameFontSel.value                             : membrosAcaoConfig.nameFont
     };
     saveToStorage('membrosAcaoConfig', membrosAcaoConfig);
     ipcRenderer.send('membros-acao-config', membrosAcaoConfig);
@@ -2059,7 +2074,7 @@ ipcRenderer.on('relay-status', (event, data) => {
     membrosAcaoMembers.forEach(m => ipcRenderer.send('membros-acao-add', m));
     // Re-send persistent membros state after relay reconnects
     if (membrosMembers.length > 0) {
-      ipcRenderer.send('membros-title', { title: membrosTitle });
+      ipcRenderer.send('membros-title', { title: membrosTitle, nameFont: membrosNameFont });
       membrosMembers.forEach(m => ipcRenderer.send('membros-add', m));
     }
     // Re-send top score state after relay reconnects

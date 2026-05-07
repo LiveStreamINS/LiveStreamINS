@@ -56,6 +56,7 @@ let goalCoins = loadFromStorage('goalCoins', { text: '', target: 2000, current: 
 let goalLikes = loadFromStorage('goalLikes', { text: '', target: 5000, current: 0, double: false, theme: 'neon', customColor: '#1a1f2e', style: 'default' });
 let goalPix = loadFromStorage('goalPix', { text: '', target: 100, current: 0, double: false, theme: 'neon', customColor: '#1a1f2e', style: 'default' });
 let livepixUrl = loadFromStorage('livepixUrl', '');
+let livepixResetOffset = loadFromStorage('livepixResetOffset', 0); // subtracted from raw livepix total after reset
 
 // Top Score state
 let topScore = loadFromStorage('topScore', { title: '', desc: '', subtitle: '', name: '', avatar: '', valor: 0 });
@@ -1344,6 +1345,9 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   const btnReset = document.getElementById('btn-goal-pix-reset');
   if (btnReset) {
     btnReset.addEventListener('click', () => {
+      // Store current raw total as offset so future livepix-update events start from 0
+      livepixResetOffset = (livepixResetOffset || 0) + (goalPix.current || 0);
+      saveToStorage('livepixResetOffset', livepixResetOffset);
       goalPix.current = 0;
       saveToStorage('goalPix', goalPix);
       if (progEl) progEl.textContent = 'R$ 0 / R$ ' + goalPix.target.toLocaleString('pt-BR');
@@ -2126,12 +2130,13 @@ const relayStatusText = document.getElementById('relay-status-text');
 
 // LivePix update handler
 ipcRenderer.on('livepix-update', (event, { total }) => {
-  if (total !== goalPix.current) {
-    goalPix.current = total;
+  const adjusted = Math.max(0, total - (livepixResetOffset || 0));
+  if (adjusted !== goalPix.current) {
+    goalPix.current = adjusted;
     saveToStorage('goalPix', goalPix);
-    updateGoalProgress('pix', 0); // trigger re-render with current value
+    updateGoalProgress('pix', 0);
     const progEl = document.getElementById('goal-pix-progress');
-    if (progEl) progEl.textContent = 'R$ ' + total.toLocaleString('pt-BR') + ' / R$ ' + goalPix.target.toLocaleString('pt-BR');
+    if (progEl) progEl.textContent = 'R$ ' + adjusted.toLocaleString('pt-BR') + ' / R$ ' + goalPix.target.toLocaleString('pt-BR');
     ipcRenderer.send('goal-update', { type: 'pix', ...goalPix });
   }
 });

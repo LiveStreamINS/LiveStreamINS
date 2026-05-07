@@ -1567,13 +1567,13 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   const btnAcaoManual    = document.getElementById('btn-membros-acao-add-manual');
   const acaoManualStatus = document.getElementById('membros-acao-manual-status');
 
-  // Fetch profile with up to `maxTries` attempts. Only resolves if result.ok AND has userId+photo.
+  // Fetch profile with up to `maxTries` attempts. Only requires userId to succeed (photo is a bonus).
   async function fetchProfileWithRetry(username, maxTries = 3) {
     for (let i = 0; i < maxTries; i++) {
       if (i > 0) await new Promise(r => setTimeout(r, 1200));
       try {
         const r = await ipcRenderer.invoke('fetch-tiktok-profile', username);
-        if (r.ok && r.userId && r.profilePictureUrl) return r;
+        if (r.ok && r.userId) return r;
       } catch (_) {}
     }
     throw new Error('profile_not_found');

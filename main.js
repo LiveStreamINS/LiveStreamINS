@@ -245,6 +245,11 @@ function createWindow() {
 
   mainWindow.loadFile('renderer/index.html');
 
+  // Re-focus webContents whenever the window is focused so inputs always work
+  mainWindow.on('focus', () => {
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.focus();
+  });
+
   mainWindow.on('close', () => {
     // Destroy hidden BrowserWindows so the process doesn't stay alive
     if (livepixBrowserWin && !livepixBrowserWin.isDestroyed()) {
@@ -512,6 +517,7 @@ function fetchTikTokRoomId(username) {
     bw = new BrowserWindow({
       width: 1024, height: 768,
       show: false,
+      focusable: false,
       webPreferences: {
         session: tiktokLiveSess,
         nodeIntegration: false,
@@ -973,7 +979,7 @@ ipcMain.on('livepix-start-poll', async (event, { url }) => {
   }
 
   livepixBrowserWin = new BrowserWindow({
-    width: 900, height: 600, show: false,
+    width: 900, height: 600, show: false, focusable: false,
     webPreferences: { nodeIntegration: false, contextIsolation: true }
   });
 
@@ -1526,7 +1532,7 @@ ipcMain.on('connect-youtube-chat', async (event, { username }) => {
 
   youtubeChatBW = new BrowserWindow({
     width: 500, height: 600,
-    show: false,
+    show: false, focusable: false,
     webPreferences: { nodeIntegration: false, contextIsolation: true }
   });
 

@@ -3,6 +3,13 @@ const path = require('path');
 const fs = require('fs');
 const TIKTOK_GIFTS = require('../gifts');
 
+// Wrapper for confirm() that restores webContents focus after the native dialog closes
+function appConfirm(msg) {
+  const result = confirm(msg);
+  ipcRenderer.send('refocus-window');
+  return result;
+}
+
 // ============================================
 // STATE
 // ============================================
@@ -1569,7 +1576,7 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   if (btnSave) btnSave.addEventListener('click', () => { sendConfig(); showToast('Membros Ação salvo!', 'success'); });
 
   if (btnReset) btnReset.addEventListener('click', () => {
-    if (!confirm('Limpar todos os membros ação?')) return;
+    if (!appConfirm('Limpar todos os membros ação?')) return;
     membrosAcaoMembers = [];
     saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
     ipcRenderer.send('membros-acao-reset');
@@ -1979,7 +1986,7 @@ if (pointsPerCoinInput) {
 const btnResetPoints = document.getElementById('btn-reset-points');
 if (btnResetPoints) {
   btnResetPoints.addEventListener('click', () => {
-    if (!confirm('Resetar o ranking de pontos? Esta ação não pode ser desfeita.')) return;
+    if (!appConfirm('Resetar o ranking de pontos? Esta ação não pode ser desfeita.')) return;
     pointsRanking = {};
     saveToStorage('pointsRanking', pointsRanking);
     renderPointsRanking();

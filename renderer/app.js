@@ -1613,29 +1613,38 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
         showToast(`✅ ${nickname} adicionado aos Membros Ação!`, 'success');
       }
     } catch (e) {
-      // Profile fetch failed (network/timeout) — add member anyway without photo
-      const userId   = username;
-      const nickname = username;
-      const profilePictureUrl = '';
-      const existing = membrosAcaoMembers.find(m => m.userId === userId);
-      if (existing) {
-        existing.value = (existing.value || 0) + valueToAdd;
-        existing.nickname = nickname || existing.nickname;
-        saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
-        ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
-        if (acaoManualInput) acaoManualInput.value = '';
-        if (acaoManualValInput) acaoManualValInput.value = '';
-        if (acaoManualStatus) { acaoManualStatus.style.color = '#f59e0b'; acaoManualStatus.textContent = `⚠️ ${nickname} atualizado (sem foto — erro de rede).`; }
-        showToast(`✅ ${nickname} atualizado!`, 'success');
-      } else {
-        membrosAcaoMembers.push({ userId, nickname, profilePictureUrl, value: valueToAdd });
-        saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
-        ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
-        if (countEl) countEl.textContent = membrosAcaoMembers.length;
-        if (acaoManualInput) acaoManualInput.value = '';
-        if (acaoManualValInput) acaoManualValInput.value = '';
-        if (acaoManualStatus) { acaoManualStatus.style.color = '#f59e0b'; acaoManualStatus.textContent = `⚠️ @${username} adicionado (sem foto — erro de rede).`; }
-        showToast(`✅ @${username} adicionado aos Membros Ação!`, 'success');
+      // First attempt failed — retry once automatically before giving up
+      if (acaoManualStatus) { acaoManualStatus.style.color = '#aaa'; acaoManualStatus.textContent = '🔄 Tentando novamente...'; }
+      try {
+        await new Promise(r => setTimeout(r, 1200));
+        const result2 = await ipcRenderer.invoke('fetch-tiktok-profile', username);
+        const userId            = result2.ok ? result2.userId            : null;
+        const nickname          = result2.ok ? result2.nickname          : null;
+        const profilePictureUrl = result2.ok ? result2.profilePictureUrl : '';
+        if (!result2.ok || !userId) throw new Error('no profile');
+        const existing = membrosAcaoMembers.find(m => m.userId === userId);
+        if (existing) {
+          existing.value = (existing.value || 0) + valueToAdd;
+          existing.nickname = nickname || existing.nickname;
+          existing.profilePictureUrl = profilePictureUrl || existing.profilePictureUrl;
+          saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
+          ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
+          if (acaoManualInput) acaoManualInput.value = '';
+          if (acaoManualValInput) acaoManualValInput.value = '';
+          if (acaoManualStatus) { acaoManualStatus.style.color = '#22c55e'; acaoManualStatus.textContent = `✅ ${nickname} atualizado! Total: ${existing.value}`; }
+          showToast(`✅ ${nickname} atualizado!`, 'success');
+        } else {
+          membrosAcaoMembers.push({ userId, nickname, profilePictureUrl, value: valueToAdd });
+          saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
+          ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
+          if (countEl) countEl.textContent = membrosAcaoMembers.length;
+          if (acaoManualInput) acaoManualInput.value = '';
+          if (acaoManualValInput) acaoManualValInput.value = '';
+          if (acaoManualStatus) { acaoManualStatus.style.color = '#22c55e'; acaoManualStatus.textContent = `✅ ${nickname} adicionado com sucesso!`; }
+          showToast(`✅ ${nickname} adicionado aos Membros Ação!`, 'success');
+        }
+      } catch (e2) {
+        if (acaoManualStatus) { acaoManualStatus.style.color = '#ef4444'; acaoManualStatus.textContent = '❌ Não foi possível buscar o perfil. Tente novamente.'; }
       }
     }
 

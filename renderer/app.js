@@ -871,15 +871,30 @@ function renderPointsRanking() {
       ? `<img src="${user.profilePictureUrl}" alt="" onerror="this.parentElement.innerHTML='👤'">`
       : '👤';
     const frameClass = pos <= 3 ? `avatar-frame-${pos}` : '';
-    return `<div class="ranking-item">
+    const uid = escapeHtml(user.id);
+    return `<div class="ranking-item" style="flex-wrap:wrap;">
       <div class="ranking-position ${posClass}">${pos}</div>
       <div class="ranking-avatar ${frameClass}">${avatarContent}</div>
-      <div class="ranking-user-info">
-        <div class="ranking-user-name">${escapeHtml(user.nickname)}</div>
+      <div class="ranking-user-info" style="flex:1;">
+        <div class="ranking-user-name points-name-click" data-uid="${uid}" style="cursor:pointer;" title="Clique para ver o username">
+          ${escapeHtml(user.nickname)} <span style="font-size:10px;opacity:0.5;">🔍</span>
+        </div>
         <div class="ranking-user-value">⭐ ${(user.points||0).toLocaleString('pt-BR')} ${pointsConfig.label}</div>
+      </div>
+      <div class="points-uid-reveal" data-uid="${uid}" style="display:none;width:100%;padding:4px 8px 4px 42px;font-size:11px;color:#a0aec0;word-break:break-all;">
+        🆔 Username ID: <span style="color:#fff;font-family:monospace;">${uid}</span>
       </div>
     </div>`;
   }).join('');
+
+  // Toggle username reveal on name click
+  list.querySelectorAll('.points-name-click').forEach(el => {
+    el.addEventListener('click', () => {
+      const uid = el.dataset.uid;
+      const reveal = list.querySelector(`.points-uid-reveal[data-uid="${uid}"]`);
+      if (reveal) reveal.style.display = reveal.style.display === 'none' ? 'block' : 'none';
+    });
+  });
 }
 
 function renderLikesRanking() {

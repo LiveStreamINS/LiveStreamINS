@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TikTok Live Interactive</title>
+  <title>Live Stream INS</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
   <div class="titlebar">
     <div class="titlebar-drag">
       <span class="titlebar-icon">🎮</span>
-      <span class="titlebar-title">TikTok Live Interactive</span>
+      <span class="titlebar-title">Live Stream INS</span>
     </div>
     <div class="titlebar-buttons">
       <button class="tb-btn minimize" id="btn-minimize">─</button>
@@ -141,7 +141,7 @@
           <button class="ranking-tab" data-ranking="timer">⏱️ Cronômetro</button>
           <button class="ranking-tab" data-ranking="goals">🎯 Metas</button>
           <button class="ranking-tab" data-ranking="membros">👥 Membros</button>
-          <button class="ranking-tab" data-ranking="top-score">🏆 Top</button>
+          <button class="ranking-tab" data-ranking="top-score">🏆 Top pontuação</button>
           <button class="ranking-tab" data-ranking="top-presentes">🎁 TOP PRESENTES</button>
         </div>
         <div class="ranking-controls">
@@ -287,6 +287,13 @@
 
         <div class="ranking-content" id="ranking-jar">
           <div class="jar-controls" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="ranking-bg-control">
+              <label>Visual:</label>
+              <select id="jar-visual-select" class="form-input small-input">
+                <option value="default">📦 Padrão</option>
+                <option value="chest">🪙 Baú do Tesouro</option>
+              </select>
+            </div>
             <div class="ranking-bg-control">
               <label>Tema:</label>
               <select id="jar-theme-select" class="form-input small-input">
@@ -641,13 +648,13 @@
         <!-- TOP SCORE PANEL -->
         <div class="ranking-content" id="ranking-top-score">
           <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;">
-            <h4 style="margin:0 0 4px;color:#d4a020;">🏆 Top Pontuação — Velho Oeste</h4>
-            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Card individual em estilo Velho Oeste para destacar o top do momento.</p>
+            <h4 style="margin:0 0 4px;color:#d4a020;">🏆 Top Pontuação Individual</h4>
+            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Card individual para destacar o top pontuação de algo.</p>
 
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
               <div style="flex:1;min-width:120px;">
                 <label style="font-size:11px;color:var(--text-secondary);">Título</label>
-                <input type="text" id="ts-title" placeholder="TOP KILL" class="form-input" value="">
+                <input type="text" id="ts-title" placeholder="Digite um título" class="form-input" value="">
               </div>
               <div style="flex:1;min-width:120px;">
                 <label style="font-size:11px;color:var(--text-secondary);">Subtítulo (label do valor)</label>
@@ -656,7 +663,7 @@
             </div>
             <div style="margin-bottom:10px;">
               <label style="font-size:11px;color:var(--text-secondary);">Desc (texto pequeno abaixo do título)</label>
-              <input type="text" id="ts-desc" placeholder="Recordista da Arena" class="form-input" value="">
+              <input type="text" id="ts-desc" placeholder="Digite um texto ou deixe em branco" class="form-input" value="">
             </div>
 
             <div style="background:var(--bg-secondary);padding:12px;border-radius:8px;margin-bottom:10px;">
@@ -1011,7 +1018,7 @@
                 <span class="link-card-icon">🏆</span>
                 <div>
                   <h4>Top Pontuação</h4>
-                  <p>Card Velho Oeste com o destaque do momento</p>
+                  <p>Card individual para destacar o top pontuação de algo</p>
                 </div>
               </div>
               <div class="link-copy-row">

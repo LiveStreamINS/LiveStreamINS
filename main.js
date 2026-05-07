@@ -7,6 +7,76 @@ const WebSocket = require('ws');
 const crypto = require('crypto');
 
 let mainWindow;
+let lockWindow = null;
+
+// ============================================
+// ACCESS KEY SYSTEM
+// ============================================
+const KEY_FILE = () => path.join(app.getPath('userData'), 'access.json');
+
+function getSavedKey() {
+  try { return JSON.parse(fs.readFileSync(KEY_FILE(), 'utf-8')).key || ''; } catch(e) { return ''; }
+}
+
+function saveKey(key) {
+  try { fs.writeFileSync(KEY_FILE(), JSON.stringify({ key })); } catch(e) {}
+}
+
+function validateKeyOnline(key) {
+  return new Promise((resolve) => {
+    const url = DEFAULT_RELAY_URL + '/validate-key?k=' + encodeURIComponent(key);
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', d => data += d);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch(e) { resolve({ valid: false, offline: true }); }
+      });
+    }).on('error', () => resolve({ valid: false, offline: true }));
+  });
+}
+
+function createLockWindow() {
+  lockWindow = new BrowserWindow({
+    width: 400,
+    height: 360,
+    resizable: false,
+    frame: false,
+    center: true,
+    backgroundColor: '#0e1120',
+    icon: path.join(__dirname, 'icon.png'),
+    webPreferences: { nodeIntegration: true, contextIsolation: false }
+  });
+  lockWindow.loadFile('renderer/lock.html');
+  lockWindow.on('closed', () => { lockWindow = null; });
+
+  lockWindow.webContents.once('did-finish-load', () => {
+    const saved = getSavedKey();
+    if (saved) lockWindow.webContents.send('try-saved-key', saved);
+  });
+}
+
+ipcMain.on('lock-close', () => { if (lockWindow) lockWindow.close(); app.quit(); });
+
+ipcMain.on('validate-key', async (event, key) => {
+  const result = await validateKeyOnline(key);
+  if (result.valid) {
+    saveKey(key);
+    if (lockWindow) { lockWindow.close(); lockWindow = null; }
+    const config = getRelayConfig();
+    connectToRelay(config.relayUrl || DEFAULT_RELAY_URL);
+    createWindow();
+  } else if (result.offline && key) {
+    // No internet but has a key — allow with grace
+    if (lockWindow) { lockWindow.close(); lockWindow = null; }
+    const config = getRelayConfig();
+    connectToRelay(config.relayUrl || DEFAULT_RELAY_URL);
+    createWindow();
+  } else {
+    if (lockWindow && !lockWindow.isDestroyed())
+      lockWindow.webContents.send('key-result', result);
+  }
+});
 
 // ============================================
 // RELAY SERVER CONNECTION
@@ -846,7 +916,7 @@ ipcMain.on('jar-reset', () => {
 });
 
 ipcMain.on('jar-config', (event, data) => {
-  relaySend({ type: 'jar-config', theme: data.theme, customColor: data.customColor, capacity: data.capacity });
+  relaySend({ type: 'jar-config', theme: data.theme, customColor: data.customColor, capacity: data.capacity, visual: data.visual });
 });
 
 // Goal events
@@ -1620,12 +1690,26 @@ ipcMain.on('disconnect-youtube-chat', () => {
 // ============================================
 // APP START
 // ============================================
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   roomId = getRoomId();
-  const config = getRelayConfig();
-  const urlToConnect = config.relayUrl || DEFAULT_RELAY_URL;
-  connectToRelay(urlToConnect);
-  createWindow();
+
+  // Validate access key before opening main window
+  const savedKey = getSavedKey();
+  if (savedKey) {
+    const result = await validateKeyOnline(savedKey);
+    if (result.valid || result.offline) {
+      // Valid or offline grace — open normally
+      const config = getRelayConfig();
+      connectToRelay(config.relayUrl || DEFAULT_RELAY_URL);
+      createWindow();
+    } else {
+      // Key was revoked — show lock screen
+      createLockWindow();
+    }
+  } else {
+    // No key saved — show lock screen
+    createLockWindow();
+  }
 
   // HTTP keep-alive every 4 minutes (backup to prevent Render free tier sleep)
   setInterval(() => {

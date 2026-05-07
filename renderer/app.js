@@ -920,17 +920,24 @@ document.getElementById('btn-reset-jar').addEventListener('click', () => {
   showToast('Cofrinho resetado!', 'success');
 });
 
-// Jar config (theme, custom color, capacity)
+// Jar config (theme, custom color, capacity, visual)
 function sendJarConfig() {
   const theme = document.getElementById('jar-theme-select')?.value || 'clean';
   const customColor = document.getElementById('jar-custom-color')?.value || '#1a1f2e';
   const capacity = parseInt(document.getElementById('jar-capacity-select')?.value || '1000', 10);
+  const visual = document.getElementById('jar-visual-select')?.value || 'default';
   saveToStorage('jarTheme', theme);
   saveToStorage('jarCustomColor', customColor);
   saveToStorage('jarCapacity', capacity);
-  ipcRenderer.send('jar-config', { theme, customColor, capacity });
+  saveToStorage('jarVisual', visual);
+  ipcRenderer.send('jar-config', { theme, customColor, capacity, visual });
 }
 
+document.getElementById('jar-visual-select')?.addEventListener('change', () => {
+  sendJarConfig();
+  const v = document.getElementById('jar-visual-select').value;
+  showToast(v === 'chest' ? 'Visual: Baú do Tesouro!' : 'Visual: Padrão!', 'success');
+});
 document.getElementById('jar-theme-select')?.addEventListener('change', () => {
   const theme = document.getElementById('jar-theme-select').value;
   const wrap = document.getElementById('jar-custom-color-wrap');
@@ -952,16 +959,19 @@ document.getElementById('jar-capacity-select')?.addEventListener('change', () =>
   const savedTheme = loadFromStorage('jarTheme', 'clean');
   const savedColor = loadFromStorage('jarCustomColor', '#1a1f2e');
   const savedCapacity = loadFromStorage('jarCapacity', 1000);
+  const savedVisual = loadFromStorage('jarVisual', 'default');
   const themeSel = document.getElementById('jar-theme-select');
   const colorEl = document.getElementById('jar-custom-color');
   const capSel = document.getElementById('jar-capacity-select');
+  const visualSel = document.getElementById('jar-visual-select');
   if (themeSel) themeSel.value = savedTheme;
   if (colorEl) colorEl.value = savedColor;
   if (capSel) capSel.value = String(savedCapacity);
+  if (visualSel) visualSel.value = savedVisual;
   const wrap = document.getElementById('jar-custom-color-wrap');
   if (wrap) wrap.style.display = savedTheme === 'custom' ? '' : 'none';
-  // Push to relay so overlay receives current capacity even before user changes anything
-  ipcRenderer.send('jar-config', { theme: savedTheme, customColor: savedColor, capacity: savedCapacity });
+  // Push to relay so overlay receives current settings even before user changes anything
+  ipcRenderer.send('jar-config', { theme: savedTheme, customColor: savedColor, capacity: savedCapacity, visual: savedVisual });
 })();
 
 // ============================================

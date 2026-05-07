@@ -1383,6 +1383,17 @@
   <!-- TOAST NOTIFICATIONS -->
   <div class="toast-container" id="toast-container"></div>
 
+  <!-- CUSTOM CONFIRM MODAL -->
+  <div id="app-confirm-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#1e2336;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:24px 28px;max-width:340px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+      <p id="app-confirm-msg" style="color:#fff;font-size:14px;margin:0 0 20px;line-height:1.5;"></p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button id="app-confirm-cancel" style="padding:8px 18px;border-radius:7px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#aaa;cursor:pointer;font-size:13px;">Cancelar</button>
+        <button id="app-confirm-ok" style="padding:8px 18px;border-radius:7px;border:none;background:#ef4444;color:#fff;cursor:pointer;font-size:13px;font-weight:700;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

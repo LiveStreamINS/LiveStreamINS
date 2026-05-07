@@ -3,11 +3,27 @@ const path = require('path');
 const fs = require('fs');
 const TIKTOK_GIFTS = require('../gifts');
 
-// Wrapper for confirm() that restores webContents focus after the native dialog closes
+// Custom in-app confirm — never steals focus unlike native confirm()
 function appConfirm(msg) {
-  const result = confirm(msg);
-  ipcRenderer.send('refocus-window');
-  return result;
+  return new Promise(resolve => {
+    const overlay = document.getElementById('app-confirm-overlay');
+    const msgEl   = document.getElementById('app-confirm-msg');
+    const btnOk   = document.getElementById('app-confirm-ok');
+    const btnCancel = document.getElementById('app-confirm-cancel');
+    if (!overlay) { resolve(false); return; }
+    msgEl.textContent = msg;
+    overlay.style.display = 'flex';
+    function cleanup(result) {
+      overlay.style.display = 'none';
+      btnOk.removeEventListener('click', onOk);
+      btnCancel.removeEventListener('click', onCancel);
+      resolve(result);
+    }
+    function onOk()     { cleanup(true);  }
+    function onCancel() { cleanup(false); }
+    btnOk.addEventListener('click', onOk);
+    btnCancel.addEventListener('click', onCancel);
+  });
 }
 
 // ============================================
@@ -1575,8 +1591,8 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
 
   if (btnSave) btnSave.addEventListener('click', () => { sendConfig(); showToast('Membros Ação salvo!', 'success'); });
 
-  if (btnReset) btnReset.addEventListener('click', () => {
-    if (!appConfirm('Limpar todos os membros ação?')) return;
+  if (btnReset) btnReset.addEventListener('click', async () => {
+    if (!await appConfirm('Limpar todos os membros ação?')) return;
     membrosAcaoMembers = [];
     saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
     ipcRenderer.send('membros-acao-reset');
@@ -1985,8 +2001,8 @@ if (pointsPerCoinInput) {
 
 const btnResetPoints = document.getElementById('btn-reset-points');
 if (btnResetPoints) {
-  btnResetPoints.addEventListener('click', () => {
-    if (!appConfirm('Resetar o ranking de pontos? Esta ação não pode ser desfeita.')) return;
+  btnResetPoints.addEventListener('click', async () => {
+    if (!await appConfirm('Resetar o ranking de pontos? Esta ação não pode ser desfeita.')) return;
     pointsRanking = {};
     saveToStorage('pointsRanking', pointsRanking);
     renderPointsRanking();

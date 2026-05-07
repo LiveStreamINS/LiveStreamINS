@@ -1567,6 +1567,18 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   const btnAcaoManual    = document.getElementById('btn-membros-acao-add-manual');
   const acaoManualStatus = document.getElementById('membros-acao-manual-status');
 
+  // Fetch profile with up to `maxTries` attempts. Only resolves if result.ok AND has userId+photo.
+  async function fetchProfileWithRetry(username, maxTries = 3) {
+    for (let i = 0; i < maxTries; i++) {
+      if (i > 0) await new Promise(r => setTimeout(r, 1200));
+      try {
+        const r = await ipcRenderer.invoke('fetch-tiktok-profile', username);
+        if (r.ok && r.userId && r.profilePictureUrl) return r;
+      } catch (_) {}
+    }
+    throw new Error('profile_not_found');
+  }
+
   async function addMembrosAcaoManual() {
     const raw = (acaoManualInput ? acaoManualInput.value : '').trim();
     if (!raw) return;
@@ -1577,16 +1589,11 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
     if (btnAcaoManual) btnAcaoManual.disabled = true;
 
     try {
-      const result = await ipcRenderer.invoke('fetch-tiktok-profile', username);
-
-      const userId            = result.ok ? result.userId            : username;
-      const nickname          = result.ok ? result.nickname          : username;
-      const profilePictureUrl = result.ok ? result.profilePictureUrl : '';
+      const result = await fetchProfileWithRetry(username);
+      const { userId, nickname, profilePictureUrl } = result;
 
       const existing = membrosAcaoMembers.find(m => m.userId === userId);
-
       if (existing) {
-        // Soma o valor ao existente
         existing.value = (existing.value || 0) + valueToAdd;
         existing.nickname = nickname || existing.nickname;
         existing.profilePictureUrl = profilePictureUrl || existing.profilePictureUrl;
@@ -1597,55 +1604,17 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
         if (acaoManualStatus) { acaoManualStatus.style.color = '#22c55e'; acaoManualStatus.textContent = `✅ ${nickname} atualizado! Total: ${existing.value}`; }
         showToast(`✅ ${nickname} atualizado! Total: ${existing.value}`, 'success');
       } else {
-        // Novo membro
         membrosAcaoMembers.push({ userId, nickname, profilePictureUrl, value: valueToAdd });
         saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
         ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
         if (countEl) countEl.textContent = membrosAcaoMembers.length;
         if (acaoManualInput) acaoManualInput.value = '';
         if (acaoManualValInput) acaoManualValInput.value = '';
-
-        if (!result.ok) {
-          if (acaoManualStatus) { acaoManualStatus.style.color = '#f59e0b'; acaoManualStatus.textContent = `✅ @${username} adicionado (sem foto — TikTok bloqueou a busca).`; }
-        } else {
-          if (acaoManualStatus) { acaoManualStatus.style.color = '#22c55e'; acaoManualStatus.textContent = `✅ ${nickname} adicionado com sucesso!`; }
-        }
+        if (acaoManualStatus) { acaoManualStatus.style.color = '#22c55e'; acaoManualStatus.textContent = `✅ ${nickname} adicionado com sucesso!`; }
         showToast(`✅ ${nickname} adicionado aos Membros Ação!`, 'success');
       }
     } catch (e) {
-      // First attempt failed — retry once automatically before giving up
-      if (acaoManualStatus) { acaoManualStatus.style.color = '#aaa'; acaoManualStatus.textContent = '🔄 Tentando novamente...'; }
-      try {
-        await new Promise(r => setTimeout(r, 1200));
-        const result2 = await ipcRenderer.invoke('fetch-tiktok-profile', username);
-        const userId            = result2.ok ? result2.userId            : null;
-        const nickname          = result2.ok ? result2.nickname          : null;
-        const profilePictureUrl = result2.ok ? result2.profilePictureUrl : '';
-        if (!result2.ok || !userId) throw new Error('no profile');
-        const existing = membrosAcaoMembers.find(m => m.userId === userId);
-        if (existing) {
-          existing.value = (existing.value || 0) + valueToAdd;
-          existing.nickname = nickname || existing.nickname;
-          existing.profilePictureUrl = profilePictureUrl || existing.profilePictureUrl;
-          saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
-          ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
-          if (acaoManualInput) acaoManualInput.value = '';
-          if (acaoManualValInput) acaoManualValInput.value = '';
-          if (acaoManualStatus) { acaoManualStatus.style.color = '#22c55e'; acaoManualStatus.textContent = `✅ ${nickname} atualizado! Total: ${existing.value}`; }
-          showToast(`✅ ${nickname} atualizado!`, 'success');
-        } else {
-          membrosAcaoMembers.push({ userId, nickname, profilePictureUrl, value: valueToAdd });
-          saveToStorage('membrosAcaoMembers', membrosAcaoMembers);
-          ipcRenderer.send('membros-acao-add', { userId, nickname, profilePictureUrl, value: valueToAdd });
-          if (countEl) countEl.textContent = membrosAcaoMembers.length;
-          if (acaoManualInput) acaoManualInput.value = '';
-          if (acaoManualValInput) acaoManualValInput.value = '';
-          if (acaoManualStatus) { acaoManualStatus.style.color = '#22c55e'; acaoManualStatus.textContent = `✅ ${nickname} adicionado com sucesso!`; }
-          showToast(`✅ ${nickname} adicionado aos Membros Ação!`, 'success');
-        }
-      } catch (e2) {
-        if (acaoManualStatus) { acaoManualStatus.style.color = '#ef4444'; acaoManualStatus.textContent = '❌ Não foi possível buscar o perfil. Tente novamente.'; }
-      }
+      if (acaoManualStatus) { acaoManualStatus.style.color = '#ef4444'; acaoManualStatus.textContent = '❌ Perfil não encontrado. Verifique o @ e tente novamente.'; }
     }
 
     if (btnAcaoManual) btnAcaoManual.disabled = false;

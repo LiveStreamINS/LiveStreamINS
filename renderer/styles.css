@@ -311,6 +311,73 @@ body {
   flex: 1;
 }
 
+/* ── LOGOUT BUTTON ── */
+.btn-logout {
+  width: 64px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.25);
+  padding: 10px 4px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.2s, color 0.2s;
+  margin-bottom: 4px;
+}
+.btn-logout:hover {
+  background: rgba(239,68,68,0.12);
+  color: #f87171;
+}
+.logout-icon { font-size: 18px; line-height: 1; }
+.logout-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+
+/* ── LOGOUT MODAL ── */
+.logout-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.logout-overlay.open { display: flex; }
+.logout-modal {
+  background: #1a1f2e;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  padding: 32px 28px 24px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+  animation: logoutPop 0.2s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes logoutPop { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.logout-modal-icon { font-size: 44px; margin-bottom: 12px; }
+.logout-modal-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.logout-modal-desc { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.5; margin-bottom: 24px; }
+.logout-modal-btns { display: flex; gap: 10px; }
+.logout-btn-cancel {
+  flex: 1; padding: 10px; border-radius: 9px;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'Segoe UI', sans-serif;
+  transition: background 0.15s;
+}
+.logout-btn-cancel:hover { background: rgba(255,255,255,0.12); }
+.logout-btn-confirm {
+  flex: 1; padding: 10px; border-radius: 9px;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border: none; color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Segoe UI', sans-serif;
+  transition: opacity 0.15s;
+}
+.logout-btn-confirm:hover { opacity: 0.88; }
+
 .live-events {
   display: flex;
   align-items: center;
@@ -1714,6 +1781,120 @@ body {
   font-size: 11px;
   padding: 4px 8px;
 }
+
+/* ====== DESEJO DO STREAMER CARD EFEITO ====== */
+.presentes-card {
+  background: var(--bg-tertiary);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.12);
+  animation: glow-purple 2.5s ease-in-out infinite;
+}
+
+@keyframes glow-purple {
+  0%, 100% {
+    border-color: rgba(168, 85, 247, 0.25);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.12);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 0.65);
+    box-shadow: 0 0 28px rgba(168, 85, 247, 0.30), 0 0 6px rgba(168, 85, 247, 0.20) inset;
+  }
+}
+
+/* Flash quando recebe presente do desejo */
+.presentes-card-flash-purple {
+  animation: flash-purple 0.8s ease-out !important;
+}
+
+@keyframes flash-purple {
+  0%   {
+    border-color: rgba(168, 85, 247, 1);
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.70), 0 0 12px rgba(168, 85, 247, 0.40) inset;
+  }
+  100% {
+    border-color: rgba(168, 85, 247, 0.25);
+    box-shadow: 0 0 14px rgba(168, 85, 247, 0.12);
+  }
+}
+
+/* Galeria de Presentes — botões de liga */
+.btn-galeria-liga {
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(99,202,183,0.30);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-galeria-liga:hover {
+  border-color: rgba(99,202,183,0.60);
+  color: #63cab7;
+}
+.btn-galeria-liga.active-liga {
+  background: rgba(99,202,183,0.18);
+  border-color: rgba(99,202,183,0.70);
+  color: #63cab7;
+  font-weight: 700;
+}
+
+/* Galeria gift row */
+.galeria-gift-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-secondary);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.galeria-gift-row img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+.galeria-gift-row .g-name {
+  flex: 1;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.galeria-gift-row .g-counter {
+  font-weight: 700;
+  color: #63cab7;
+  white-space: nowrap;
+}
+.galeria-gift-row.g-done .g-counter {
+  color: #4ade80;
+}
+.galeria-gift-row.g-done .g-name {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.g-btn-adj {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.g-btn-dec:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.55); color: #f87171; }
+.g-btn-inc:hover { background: rgba(74,222,128,0.20); border-color: rgba(74,222,128,0.50); color: #4ade80; }
 
 /* ====== SELECTION / FOCUS STATES ====== */
 ::selection {

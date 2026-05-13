@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Stream INS - Assinatura</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0e1120; color: #e2e8f0;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden; height: 100vh;
+      display: flex; flex-direction: column;
+      user-select: none;
+    }
+    .titlebar {
+      height: 36px; background: rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px; -webkit-app-region: drag;
+      border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
+    }
+    .tb-left { display: flex; align-items: center; gap: 8px; }
+    .tb-icon { width: 20px; height: 20px; object-fit: contain; }
+    .tb-title { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; }
+    .tb-close {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; color: rgba(255,255,255,0.35); cursor: pointer;
+      font-size: 13px; display: flex; align-items: center; justify-content: center;
+      -webkit-app-region: no-drag; transition: background 0.15s, color 0.15s;
+    }
+    .tb-close:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
+
+    .content {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px;
+      overflow-y: auto;
+    }
+
+    .logo-area { text-align: center; margin-bottom: 20px; }
+    .logo-img { width: 60px; height: 60px; object-fit: contain; display: block; margin: 0 auto 10px; filter: drop-shadow(0 0 14px rgba(120,80,220,0.5)); }
+    .logo-name { font-size: 18px; font-weight: 700; color: #fff; }
+
+    .expired-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 20px; padding: 5px 14px; font-size: 12px; color: #fca5a5;
+      margin-bottom: 16px;
+    }
+
+    .title { font-size: 20px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: rgba(255,255,255,0.45); text-align: center; margin-bottom: 24px; }
+
+    .plans { display: flex; gap: 12px; width: 100%; max-width: 460px; margin-bottom: 16px; }
+
+    .plan-card {
+      flex: 1; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 18px 14px; cursor: pointer;
+      transition: all 0.2s; position: relative; text-align: center;
+    }
+    .plan-card:hover { border-color: rgba(167,139,250,0.4); background: rgba(124,58,237,0.08); }
+    .plan-card.selected { border-color: #7c3aed; background: rgba(124,58,237,0.12); }
+
+    .plan-badge {
+      position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, #6d28d9, #a78bfa);
+      border-radius: 20px; padding: 3px 12px; font-size: 11px; font-weight: 700; color: #fff;
+      white-space: nowrap;
+    }
+    .plan-name { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 8px; font-weight: 500; }
+    .plan-price { font-size: 28px; font-weight: 800; color: #fff; line-height: 1; }
+    .plan-period { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
+    .plan-equiv { font-size: 11px; color: #a78bfa; margin-top: 6px; font-weight: 600; }
+
+    .btn-subscribe {
+      width: 100%; max-width: 460px; padding: 12px;
+      background: linear-gradient(135deg, #6d28d9, #a78bfa);
+      border: none; border-radius: 10px; color: #fff;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      font-family: 'Segoe UI', sans-serif;
+      margin-bottom: 10px;
+    }
+    .btn-subscribe:hover:not(:disabled) { opacity: 0.88; }
+    .btn-subscribe:active:not(:disabled) { transform: scale(0.98); }
+    .btn-subscribe:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-verify {
+      width: 100%; max-width: 460px; padding: 10px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; color: rgba(255,255,255,0.6);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Segoe UI', sans-serif;
+      transition: all 0.2s;
+    }
+    .btn-verify:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+    .loading-bar {
+      height: 2px; width: 100%; max-width: 460px; border-radius: 2px;
+      background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
+      background-size: 200% 100%;
+      animation: loadSlide 1.2s linear infinite;
+      display: none; margin-bottom: 10px;
+    }
+    .loading-bar.show { display: block; }
+    @keyframes loadSlide { 0% { background-position: 200% 0; } 100% { background-position: 0% 0; } }
+
+    .msg-box {
+      width: 100%; max-width: 460px;
+      padding: 10px 14px; border-radius: 8px; font-size: 12px; line-height: 1.4;
+      margin-bottom: 10px; display: none;
+    }
+    .msg-box.show { display: block; }
+    .msg-box.error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; }
+    .msg-box.success { background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.25); color: #4ade80; }
+
+    .logout-link {
+      margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.25);
+      background: none; border: none; cursor: pointer;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .logout-link:hover { color: rgba(255,255,255,0.5); }
+
+    /* Trial info */
+    .trial-info {
+      width: 100%; max-width: 460px;
+      background: rgba(74,222,128,0.07); border: 1px solid rgba(74,222,128,0.2);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 18px;
+      font-size: 12px; color: rgba(255,255,255,0.6); line-height: 1.5;
+      display: none;
+    }
+    .trial-info.show { display: block; }
+    .trial-info strong { color: #4ade80; }
+  </style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="tb-left">
+    <img class="tb-icon" src="logo-ls.png" alt="LS">
+    <span class="tb-title">Live Stream INS</span>
+  </div>
+  <button class="tb-close" id="btn-close">✕</button>
+</div>
+
+<div class="content">
+  <div class="logo-area">
+    <img class="logo-img" src="logo-ls.png" alt="Logo">
+    <div class="logo-name">Live Stream INS</div>
+  </div>
+
+  <div class="expired-badge" id="status-badge">⏰ Trial expirado</div>
+
+  <div class="title" id="title-text">Continue usando o Live Stream INS</div>
+  <div class="subtitle" id="subtitle-text">Escolha um plano e tenha acesso completo a todas as funcionalidades.</div>
+
+  <div class="trial-info" id="trial-info"></div>
+
+  <!-- Trial setup mode (new user, needs card) -->
+  <div id="trial-setup" style="display:none; width:100%; max-width:460px; margin-bottom:16px;">
+    <div style="background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.2);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;">
+      <div style="font-size:28px;margin-bottom:8px;">🎉</div>
+      <div style="font-size:15px;font-weight:700;color:#4ade80;margin-bottom:6px;">3 dias grátis!</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5;">Configure seu cartão agora e ganhe <strong style="color:#fff;">3 dias grátis</strong>.<br>Só será cobrado R$60/mês após o trial. Cancele quando quiser.</div>
+    </div>
+    <button class="btn-subscribe" id="btn-start-trial">Começar trial grátis →</button>
+    <div style="text-align:center;margin-top:8px;font-size:11px;color:rgba(255,255,255,0.25);">Você será redirecionado para o MercadoPago para configurar o cartão</div>
+  </div>
+
+  <!-- Regular plans (expired users) -->
+  <div id="plans-area" style="width:100%;max-width:460px;">
+    <div class="plans">
+      <div class="plan-card selected" id="plan-monthly" onclick="selectPlan('monthly')">
+        <div class="plan-name">Mensal</div>
+        <div class="plan-price">R$60</div>
+        <div class="plan-period">/mês</div>
+      </div>
+      <div class="plan-card" id="plan-annual" onclick="selectPlan('annual')">
+        <div class="plan-badge">🎉 2 meses grátis</div>
+        <div class="plan-name">Anual</div>
+        <div class="plan-price">R$600</div>
+        <div class="plan-period">/ano</div>
+        <div class="plan-equiv">R$50/mês</div>
+      </div>
+    </div>
+    <button class="btn-subscribe" id="btn-subscribe">Assinar agora</button>
+  </div>
+
+  <div class="loading-bar" id="loading-bar"></div>
+  <div class="msg-box error" id="error-box"></div>
+  <div class="msg-box success" id="success-box"></div>
+
+  <button class="btn-verify" id="btn-verify">Já configurei — verificar acesso</button>
+  <button class="logout-link" id="btn-logout-sub">Usar outra conta</button>
+</div>
+
+<script>
+  const { ipcRenderer, shell } = require('electron');
+
+  let selectedPlan = 'monthly';
+  let isTrialMode = false;
+
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    document.getElementById('plan-monthly').classList.toggle('selected', plan === 'monthly');
+    document.getElementById('plan-annual').classList.toggle('selected', plan === 'annual');
+  }
+
+  function setLoading(on) {
+    document.getElementById('loading-bar').classList.toggle('show', on);
+    const btns = ['btn-subscribe','btn-start-trial','btn-verify'];
+    btns.forEach(id => { const el = document.getElementById(id); if(el) el.disabled = on; });
+  }
+
+  function setTrialMode(on) {
+    isTrialMode = on;
+    document.getElementById('trial-setup').style.display = on ? 'block' : 'none';
+    document.getElementById('plans-area').style.display = on ? 'none' : 'block';
+  }
+
+  function showError(msg) {
+    document.getElementById('error-box').textContent = msg;
+    document.getElementById('error-box').classList.toggle('show', !!msg);
+    document.getElementById('success-box').classList.remove('show');
+  }
+
+  function showSuccess(msg) {
+    document.getElementById('success-box').textContent = msg;
+    document.getElementById('success-box').classList.toggle('show', !!msg);
+    document.getElementById('error-box').classList.remove('show');
+  }
+
+  document.getElementById('btn-close').addEventListener('click', () => ipcRenderer.send('subscribe-close'));
+  document.getElementById('btn-logout-sub').addEventListener('click', () => ipcRenderer.send('logout'));
+
+  // Trial setup button
+  document.getElementById('btn-start-trial').addEventListener('click', () => {
+    setLoading(true); showError('');
+    ipcRenderer.send('subscribe-request', { plan: 'trial' });
+  });
+
+  document.getElementById('btn-subscribe').addEventListener('click', () => {
+    setLoading(true);
+    showError('');
+    ipcRenderer.send('subscribe-request', { plan: selectedPlan });
+  });
+
+  document.getElementById('btn-verify').addEventListener('click', () => {
+    setLoading(true);
+    showError('');
+    ipcRenderer.send('subscribe-verify');
+  });
+
+  ipcRenderer.on('subscribe-url', (event, { url }) => {
+    setLoading(false);
+    shell.openExternal(url);
+    showSuccess('✅ Página de pagamento aberta no navegador! Após pagar, clique em "Já paguei — verificar acesso".');
+  });
+
+  ipcRenderer.on('subscribe-error', (event, { error }) => {
+    setLoading(false);
+    showError(error || 'Erro ao processar. Tente novamente.');
+  });
+
+  ipcRenderer.on('subscribe-status', (event, { subscription, trialEnds }) => {
+    setLoading(false);
+    if (subscription === 'active') {
+      showSuccess('✅ Assinatura ativa! Abrindo o app...');
+    } else if (subscription === 'trial') {
+      showSuccess('✅ Trial ativo! Abrindo o app...');
+    } else {
+      showError('Assinatura ainda não confirmada. Aguarde alguns minutos após o pagamento e tente novamente.');
+    }
+  });
+
+  // Set badge based on status passed from main
+  ipcRenderer.on('set-status', (event, { subscription, trialEnds, needsPaymentSetup }) => {
+    const badge = document.getElementById('status-badge');
+    const trialInfo = document.getElementById('trial-info');
+
+    if (needsPaymentSetup || subscription === 'pending_payment') {
+      // New user — show trial setup mode
+      setTrialMode(true);
+      badge.textContent = '🎉 Conta criada!';
+      badge.style.background = 'rgba(74,222,128,0.12)';
+      badge.style.borderColor = 'rgba(74,222,128,0.25)';
+      badge.style.color = '#4ade80';
+      document.getElementById('title-text').textContent = 'Ative seu trial gratuito';
+      document.getElementById('subtitle-text').textContent = 'Configure seu cartão e ganhe 3 dias grátis. Só cobrado após o período.';
+    } else if (subscription === 'trial' && trialEnds) {
+      const diff = trialEnds - Date.now();
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      badge.textContent = `⏳ Trial: ${days}d ${hours}h restantes`;
+      badge.style.background = 'rgba(74,222,128,0.12)';
+      badge.style.borderColor = 'rgba(74,222,128,0.25)';
+      badge.style.color = '#4ade80';
+      trialInfo.innerHTML = `Você ainda tem <strong>${days} dia(s) e ${hours} hora(s)</strong> de trial. Assine agora para não perder o acesso!`;
+      trialInfo.classList.add('show');
+    } else {
+      badge.textContent = '⏰ Trial expirado';
+    }
+  });
+</script>
+</body>
+</html>

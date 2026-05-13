@@ -2,6 +2,7 @@ const { ipcRenderer } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const TIKTOK_GIFTS = require('../gifts');
+const GIFTS_BR = require('../gifts-br');
 
 // Custom in-app confirm — never steals focus unlike native confirm()
 function appConfirm(msg) {
@@ -56,10 +57,12 @@ let goalCoins = loadFromStorage('goalCoins', { text: '', target: 2000, current: 
 let goalLikes = loadFromStorage('goalLikes', { text: '', target: 5000, current: 0, double: false, theme: 'neon', customColor: '#1a1f2e', style: 'default' });
 let goalPix = loadFromStorage('goalPix', { text: '', target: 100, current: 0, double: false, theme: 'neon', customColor: '#1a1f2e', style: 'default' });
 let livepixUrl = loadFromStorage('livepixUrl', '');
-let livepixResetOffset = loadFromStorage('livepixResetOffset', 0); // subtracted from raw livepix total after reset
+let livepixBaseline = loadFromStorage('livepixBaseline', null); // set on connect; donations above this count
+let livepixLatestTotal = null; // last raw total received from livepix
+let livepixJustConnected = false; // true until first update after clicking Conectar
 
 // Top Score state
-let topScore = loadFromStorage('topScore', { title: '', desc: '', subtitle: '', name: '', avatar: '', valor: 0 });
+let topScore = loadFromStorage('topScore', { title: '', desc: '', subtitle: '', name: '', avatar: '', valor: 0, theme: 'dourado', customColor: '#c9a44a' });
 
 // Membros state
 let membrosTitle = loadFromStorage('membrosTitle', 'Membros');
@@ -73,12 +76,64 @@ let topGiftConfig = loadFromStorage('topGiftConfig', { label: 'Maior Presente', 
 let topComboConfig = loadFromStorage('topComboConfig', { label: 'Maior Combo', labelColor: '#ffffff', nameColor: '#FFD700', comboColor: '#ff6464' });
 const editDebounce = {}; // { "userId_giftName": timestamp }
 
+// Desejo do Streamer state
+let desejoConfig = loadFromStorage('desejoConfig', {
+  name: 'Desejo do Streamer', giftName: '', giftImage: '',
+  target: 1, theme: 'neon', customColor: '', nameColor: '#ffffff', countColor: '#ffd700'
+});
+let desejoCurrent = loadFromStorage('desejoCurrent', 0);
+
+// Galeria de Presentes state
+const GALERIA_LEAGUES = {
+  D: [
+    { name:'TikTok',              target:10, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/802a21ae29f9fae5abe3693de9f874bd~tplv-obj.webp' },
+    { name:'Rose',                target:10, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp' },
+    { name:'Finger Heart',        target:6,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a4c4dc437fd3a6632aba149769491f49.png~tplv-obj.webp' },
+    { name:'Friendship Necklace', target:5,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/e033c3f28632e233bebac1668ff66a2f.png~tplv-obj.webp' },
+    { name:'Perfume',             target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/20b8f61246c7b6032777bb81bf4ee055~tplv-obj.webp' },
+    { name:'Doughnut',            target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4e7ad6bdf0a1d860c538f38026d4e812~tplv-obj.webp' },
+    { name:'Hat and Mustache',    target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/2f1e4f3f5c728ffbfa35705b480fdc92~tplv-obj.webp' },
+    { name:'Hand Hearts',         target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/6cd022271dc4669d182cad856384870f~tplv-obj.webp' },
+    { name:'Hearts',              target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/934b5a10dee8376df5870a61d2ea5cb6.png~tplv-obj.webp' },
+    { name:'Corgi',               target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/148eef0884fdb12058d1c6897d1e02b9~tplv-obj.webp' }
+  ],
+  C: [
+    { name:'Rose',             target:20, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp' },
+    { name:'Finger Heart',     target:15, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a4c4dc437fd3a6632aba149769491f49.png~tplv-obj.webp' },
+    { name:'Rosa',             target:15, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eb77ead5c3abb6da6034d3cf6cfeb438~tplv-obj.webp' },
+    { name:'Doughnut',         target:10, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4e7ad6bdf0a1d860c538f38026d4e812~tplv-obj.webp' },
+    { name:'Hat and Mustache', target:6,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/2f1e4f3f5c728ffbfa35705b480fdc92~tplv-obj.webp' },
+    { name:'Hand Hearts',      target:6,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/6cd022271dc4669d182cad856384870f~tplv-obj.webp' },
+    { name:'Hearts',           target:5,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/934b5a10dee8376df5870a61d2ea5cb6.png~tplv-obj.webp' },
+    { name:'Corgi',            target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/148eef0884fdb12058d1c6897d1e02b9~tplv-obj.webp' },
+    { name:'Money Gun',        target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/e0589e95a2b41970f0f30f6202f5fce6~tplv-obj.webp' },
+    { name:'DJ Glasses',       target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/d4aad726e2759e54a924fbcd628ea143.png~tplv-obj.webp' },
+    { name:'Swan',             target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/97a26919dbf6afe262c97e22a83f4bf1~tplv-obj.webp' },
+    { name:'Galaxy',           target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/79a02148079526539f7599150da9fd28.png~tplv-obj.webp' },
+    { name:'Fireworks',        target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9494c8a0bc5c03521ef65368e59cc2b8~tplv-obj.webp' },
+    { name:'Whale Diving',     target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/46fa70966d8e931497f5289060f9a794~tplv-obj.webp' },
+    { name:'Meteor Shower',    target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/71883933511237f7eaa1bf8cd12ed575~tplv-obj.webp' }
+  ]
+};
+let galeriaConfig   = loadFromStorage('galeriaConfig',   { league: 'D', title: 'Galeria de Presentes', theme: 'neon', titleColor: '#ffffff', nameColor: '#00d4ff', counterColor: '#ffd700', customColor: '#1a1f2e', completeColor: '#ffd700' });
+let galeriaProgress = loadFromStorage('galeriaProgress', {});
+// Rastreia quanto já foi contado por streakable-gift durante um combo ativo
+// chave: `${userId}_${giftName}` → repeatCount já somado
+const galeriaStreakCounted = {};
+
+// Alerts state
+let alertsList = loadFromStorage('alertsList', []); // [{id, name, type, audioBase64, audioVolume, enabled}]
+let alertModalEditId = null; // id being edited, or null for new
+let alertTheme = loadFromStorage('alertTheme', 'roxo');
+const likeAlertTracker = {}; // userId → accumulated likes (resets each session)
+
 // Timer state
 let timerSeconds = 0;
 let timerRunning = false;
 let timerInterval = null;
 let timerCoinsRatio = 1; // 1 coin = X seconds
 let timerTheme = 'neon';
+let timerCustomColor = '#1a1f2e';
 let timerLivePixUrl = '';
 
 // Load timer config
@@ -88,6 +143,7 @@ if (savedTimerConfig) {
   timerSeconds = tc.seconds || 0;
   timerCoinsRatio = tc.coinsRatio || 1;
   timerTheme = tc.theme || 'neon';
+  timerCustomColor = tc.customColor || '#1a1f2e';
   timerLivePixUrl = tc.livePixUrl || '';
 }
 
@@ -290,6 +346,7 @@ ipcRenderer.on('tiktok-event', (event, { type, data }) => {
     case 'like': handleLike(data); break;
     case 'roomUser': handleRoomUser(data); break;
     case 'member': handleMember(data); break;
+    case 'follow': handleFollow(data); break;
   }
 });
 
@@ -440,6 +497,55 @@ function handleGift(data) {
     }
   }
 
+  // ── Desejo do Streamer detection ──
+  if (!isStreakable || isStreakEnded) {
+    if (desejoConfig.giftName && giftName.toLowerCase() === desejoConfig.giftName.toLowerCase()) {
+      if (desejoCurrent < desejoConfig.target) {
+        const add = Math.min(repeatCount, desejoConfig.target - desejoCurrent);
+        desejoCurrent += add;
+        saveToStorage('desejoCurrent', desejoCurrent);
+        const progEl = document.getElementById('desejo-progress-display');
+        if (progEl) progEl.textContent = desejoCurrent + ' / ' + desejoConfig.target;
+        ipcRenderer.send('desejo-increment', { amount: add });
+        flashPresentesCard('card-desejo', 'purple');
+      }
+    }
+  }
+
+  // ── Galeria de Presentes detection ──
+  {
+    const leagueGifts = GALERIA_LEAGUES[galeriaConfig.league] || [];
+    const gMatch = leagueGifts.find(g => g.name.toLowerCase() === giftName.toLowerCase());
+    if (gMatch) {
+      let increment = 0;
+      if (isStreakable) {
+        // Conta incrementalmente durante o streak para não depender do evento final
+        const streakKey = `${userId}_${giftName.toLowerCase()}`;
+        const alreadyCounted = galeriaStreakCounted[streakKey] || 0;
+        increment = Math.max(0, repeatCount - alreadyCounted);
+        galeriaStreakCounted[streakKey] = repeatCount;
+        if (isStreakEnded) {
+          // Limpa o rastreador ao fim do combo
+          delete galeriaStreakCounted[streakKey];
+        }
+      } else {
+        // Presente não-streakable: conta direto
+        increment = repeatCount || 1;
+      }
+
+      if (increment > 0) {
+        const curr = galeriaProgress[gMatch.name] || 0;
+        if (curr < gMatch.target) {
+          const add = Math.min(increment, gMatch.target - curr);
+          galeriaProgress[gMatch.name] = curr + add;
+          saveToStorage('galeriaProgress', galeriaProgress);
+          ipcRenderer.send('galeria-progress', { progress: galeriaProgress, giftName: gMatch.name });
+          renderGaleriaList();
+        }
+      }
+    }
+  }
+
   // Check edit mappings - with debounce to prevent duplicate playback
   if (!isStreakable || isStreakEnded) {
     const now = Date.now();
@@ -455,6 +561,16 @@ function handleGift(data) {
         ipcRenderer.send('trigger-edit-overlay', { ...edit, senderNickname: nickname, senderPhoto: profilePic });
         flashCard('edit', idx);
       }
+    });
+
+    // Trigger gift alerts (only when streak ends or non-streakable)
+    const giftPicUrl = data.giftPictureUrl || data.gift?.image?.url_list?.[0] || '';
+    triggerAlerts('gift', {
+      nickname,
+      profilePic,
+      message: 'Obrigado',
+      giftImage: giftPicUrl,
+      giftCount: repeatCount
     });
   }
 }
@@ -477,6 +593,14 @@ function handleLike(data) {
 
   // Update like goal
   updateGoalProgress('likes', likeCount);
+
+  // Trigger like alerts at every 100-like milestone per user
+  const prevTotal = likeAlertTracker[userId] || 0;
+  const newTotal  = prevTotal + likeCount;
+  likeAlertTracker[userId] = newTotal;
+  if (Math.floor(newTotal / 100) > Math.floor(prevTotal / 100)) {
+    triggerAlerts('like', { nickname, profilePic, message: 'Obrigado pelos likes ❤️' }, true);
+  }
 }
 
 function handleRoomUser(data) {
@@ -487,6 +611,12 @@ function handleRoomUser(data) {
 function handleMember(data) {
   const nickname = data.nickname || data.uniqueId;
   showToast(`${nickname} entrou na live`, 'info');
+}
+
+function handleFollow(data) {
+  const nickname = data.nickname || data.uniqueId || 'alguém';
+  const profilePic = data.profilePictureUrl || '';
+  triggerAlerts('follow', { nickname, profilePic, message: 'Obrigado por seguir! ➕' });
 }
 
 // ============================================
@@ -1233,6 +1363,10 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   const el = (id) => document.getElementById(id);
   if (!el('ts-title')) return;
 
+  const themeSelect  = el('ts-theme-select');
+  const customWrap   = el('ts-custom-wrap');
+  const customColor  = el('ts-custom-color');
+
   // Restore saved values
   el('ts-title').value    = topScore.title    || '';
   el('ts-subtitle').value = topScore.subtitle || '';
@@ -1240,6 +1374,16 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   el('ts-name').value     = topScore.name     || '';
   el('ts-avatar').value   = topScore.avatar   || '';
   el('ts-valor').value    = topScore.valor    || 0;
+  if (themeSelect)  themeSelect.value  = topScore.theme       || 'dourado';
+  if (customColor)  customColor.value  = topScore.customColor || '#c9a44a';
+  if (customWrap)   customWrap.style.display = (topScore.theme === 'custom') ? 'block' : 'none';
+
+  // Show/hide custom color picker
+  if (themeSelect) {
+    themeSelect.addEventListener('change', () => {
+      if (customWrap) customWrap.style.display = themeSelect.value === 'custom' ? 'block' : 'none';
+    });
+  }
 
   // Send initial state to relay
   if (topScore.title || topScore.name) ipcRenderer.send('top-score-update', topScore);
@@ -1271,12 +1415,14 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   // Save & send
   el('btn-ts-save').addEventListener('click', () => {
     topScore = {
-      title:    el('ts-title').value.trim()    || 'TOP',
-      subtitle: el('ts-subtitle').value.trim() || 'PONTUAÇÃO',
-      desc:     el('ts-desc').value.trim(),
-      name:     el('ts-name').value.trim(),
-      avatar:   el('ts-avatar').value.trim(),
-      valor:    parseInt(el('ts-valor').value) || 0,
+      title:       el('ts-title').value.trim()    || 'TOP',
+      subtitle:    el('ts-subtitle').value.trim() || 'PONTUAÇÃO',
+      desc:        el('ts-desc').value.trim(),
+      name:        el('ts-name').value.trim(),
+      avatar:      el('ts-avatar').value.trim(),
+      valor:       parseInt(el('ts-valor').value) || 0,
+      theme:       themeSelect  ? themeSelect.value  : 'dourado',
+      customColor: customColor  ? customColor.value  : '#c9a44a',
     };
     saveToStorage('topScore', topScore);
     ipcRenderer.send('top-score-update', topScore);
@@ -1312,15 +1458,40 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
     customWrap.style.display = (goalPix.theme === 'custom') ? '' : 'none';
   }
 
-  // Connect button
+  // Connect / Disconnect buttons
   const btnConnect = document.getElementById('btn-goal-pix-connect');
+  const btnDisconnect = document.getElementById('btn-goal-pix-disconnect');
+
+  function setLivepixConnected(connected) {
+    if (btnConnect) btnConnect.style.display = connected ? 'none' : '';
+    if (btnDisconnect) btnDisconnect.style.display = connected ? '' : 'none';
+    if (urlInput) urlInput.disabled = connected;
+  }
+
+  // Restore connected state on tab open
+  if (livepixUrl) setLivepixConnected(true);
+
   if (btnConnect) {
     btnConnect.addEventListener('click', () => {
       const url = urlInput ? urlInput.value.trim() : '';
       if (!url) { showToast('Cole o link do LivePix!', 'error'); return; }
       livepixUrl = url;
       saveToStorage('livepixUrl', livepixUrl);
+      livepixJustConnected = true; // next update will set new baseline
       ipcRenderer.send('livepix-start-poll', { url });
+      setLivepixConnected(true);
+    });
+  }
+
+  if (btnDisconnect) {
+    btnDisconnect.addEventListener('click', () => {
+      ipcRenderer.send('livepix-stop-poll');
+      livepixUrl = '';
+      saveToStorage('livepixUrl', '');
+      const statusEl = document.getElementById('goal-pix-livepix-status');
+      if (statusEl) { statusEl.textContent = ''; }
+      setLivepixConnected(false);
+      showToast('LivePix desconectado', 'info');
     });
   }
 
@@ -1345,9 +1516,9 @@ document.getElementById('btn-goal-likes-reset')?.addEventListener('click', () =>
   const btnReset = document.getElementById('btn-goal-pix-reset');
   if (btnReset) {
     btnReset.addEventListener('click', () => {
-      // Store current raw total as offset so future livepix-update events start from 0
-      livepixResetOffset = (livepixResetOffset || 0) + (goalPix.current || 0);
-      saveToStorage('livepixResetOffset', livepixResetOffset);
+      // Move baseline to current livepix total so next donations start from 0
+      livepixBaseline = livepixLatestTotal !== null ? livepixLatestTotal : (livepixBaseline || 0) + (goalPix.current || 0);
+      saveToStorage('livepixBaseline', livepixBaseline);
       goalPix.current = 0;
       saveToStorage('goalPix', goalPix);
       if (progEl) progEl.textContent = 'R$ 0 / R$ ' + goalPix.target.toLocaleString('pt-BR');
@@ -1786,6 +1957,7 @@ function saveTimerConfig() {
     seconds: timerSeconds,
     coinsRatio: timerCoinsRatio,
     theme: timerTheme,
+    customColor: timerCustomColor,
     livePixUrl: timerLivePixUrl
   }));
 }
@@ -1824,11 +1996,25 @@ document.getElementById('timer-theme-select')?.addEventListener('change', () => 
   if (wrap) wrap.style.display = document.getElementById('timer-theme-select').value === 'custom' ? '' : 'none';
 });
 
+// Init timer UI from saved values
+(function initTimerUI() {
+  const thSel = document.getElementById('timer-theme-select');
+  const crIn  = document.getElementById('timer-coins-ratio');
+  const lpUrl = document.getElementById('timer-livepix-url');
+  const ccIn  = document.getElementById('timer-custom-color');
+  const ccWrap= document.getElementById('timer-custom-color-wrap');
+  if (thSel) { thSel.value = timerTheme; }
+  if (crIn)  { crIn.value  = timerCoinsRatio; }
+  if (lpUrl) { lpUrl.value = timerLivePixUrl; }
+  if (ccIn)  { ccIn.value  = timerCustomColor; }
+  if (ccWrap) ccWrap.style.display = timerTheme === 'custom' ? '' : 'none';
+})();
+
 document.getElementById('btn-timer-save-config')?.addEventListener('click', () => {
   timerCoinsRatio = parseInt(document.getElementById('timer-coins-ratio').value) || 1;
   timerTheme = document.getElementById('timer-theme-select').value;
+  timerCustomColor = document.getElementById('timer-custom-color')?.value || '#1a1f2e';
   timerLivePixUrl = document.getElementById('timer-livepix-url').value.trim();
-  const timerCustomColor = document.getElementById('timer-custom-color')?.value || '#1a1f2e';
   saveTimerConfig();
   ipcRenderer.send('timer-config', { theme: timerTheme, customColor: timerCustomColor });
   showToast('💾 Configurações do cronômetro salvas', 'success');
@@ -2130,11 +2316,31 @@ const relayStatusText = document.getElementById('relay-status-text');
 
 // LivePix update handler
 ipcRenderer.on('livepix-update', (event, { total }) => {
-  const adjusted = Math.max(0, total - (livepixResetOffset || 0));
+  livepixLatestTotal = total;
+
+  // On first update after clicking Conectar, set new baseline so goal starts at 0
+  if (livepixJustConnected) {
+    livepixBaseline = total;
+    livepixJustConnected = false;
+    saveToStorage('livepixBaseline', livepixBaseline);
+  }
+
+  // If no baseline yet, set it now (first ever connection)
+  if (livepixBaseline === null) {
+    livepixBaseline = total;
+    saveToStorage('livepixBaseline', livepixBaseline);
+  }
+
+  const adjusted = Math.max(0, total - livepixBaseline);
   if (adjusted !== goalPix.current) {
     goalPix.current = adjusted;
+
+    // Auto-double target when goal is reached
+    if (goalPix.double && goalPix.current >= goalPix.target) {
+      goalPix.target *= 2;
+    }
+
     saveToStorage('goalPix', goalPix);
-    updateGoalProgress('pix', 0);
     const progEl = document.getElementById('goal-pix-progress');
     if (progEl) progEl.textContent = 'R$ ' + adjusted.toLocaleString('pt-BR') + ' / R$ ' + goalPix.target.toLocaleString('pt-BR');
     ipcRenderer.send('goal-update', { type: 'pix', ...goalPix });
@@ -2152,7 +2358,7 @@ ipcRenderer.on('livepix-status', (event, data) => {
     statusEl.textContent = '⚠️ ' + data.warning;
   } else if (data.ok) {
     statusEl.style.color = '#22c55e';
-    statusEl.textContent = '✅ Conectado a @' + data.username + ' — atualizando a cada 30s';
+    statusEl.textContent = '✅ Conectado — atualizando a cada 20s';
   }
 });
 
@@ -2188,7 +2394,9 @@ ipcRenderer.on('relay-status', (event, data) => {
     if (topScore && (topScore.title || topScore.name)) {
       ipcRenderer.send('top-score-update', topScore);
     }
-    // Re-send pix goal after relay reconnects
+    // Re-send goals after relay reconnects
+    sendGoalToRelay('coins');
+    sendGoalToRelay('likes');
     ipcRenderer.send('goal-update', { type: 'pix', ...goalPix });
     if (livepixUrl) ipcRenderer.send('livepix-start-poll', { url: livepixUrl });
     // Re-send top presentes after relay reconnects
@@ -2196,6 +2404,15 @@ ipcRenderer.on('relay-status', (event, data) => {
     ipcRenderer.send('top-combo-config', topComboConfig);
     if (topGift) ipcRenderer.send('top-gift-update', topGift);
     if (topCombo) ipcRenderer.send('top-combo-update', topCombo);
+    // Re-send desejo do streamer state
+    ipcRenderer.send('desejo-config', { ...desejoConfig, current: desejoCurrent });
+    // Re-send galeria de presentes state
+    ipcRenderer.send('galeria-config', buildGaleriaPayload());
+    // Re-send alert theme
+    ipcRenderer.send('alert-config', { theme: alertTheme });
+    // Re-send timer config
+    ipcRenderer.send('timer-config', { theme: timerTheme, customColor: timerCustomColor });
+    ipcRenderer.send('timer-update', { seconds: timerSeconds, running: false, theme: timerTheme });
   } else {
     relayStatusDot.classList.remove('connected');
     relayStatusText.textContent = data.error ? 'Erro: ' + data.error : 'Reconectando...';
@@ -2236,6 +2453,18 @@ async function loadOverlayLinks() {
       if (tgLink) tgLink.value = urls.topGift || 'Não disponível';
       const tcLink = document.getElementById('link-top-combo');
       if (tcLink) tcLink.value = urls.topCombo || 'Não disponível';
+      const alertLink = document.getElementById('link-alert');
+      if (alertLink) alertLink.value = urls.alertScene1 || urls.alert || '';
+      const alertScene1Link = document.getElementById('link-alert-scene1');
+      if (alertScene1Link) alertScene1Link.value = urls.alertScene1 || '';
+      const alertScene2Link = document.getElementById('link-alert-scene2');
+      if (alertScene2Link) alertScene2Link.value = urls.alertScene2 || '';
+      const alertScene3Link = document.getElementById('link-alert-scene3');
+      if (alertScene3Link) alertScene3Link.value = urls.alertScene3 || '';
+      const desejoLink = document.getElementById('link-desejo');
+      if (desejoLink) desejoLink.value = urls.desejo || '';
+      const galeriaLink = document.getElementById('link-galeria');
+      if (galeriaLink) galeriaLink.value = urls.galeria || '';
     }
   } catch (e) {}
 }
@@ -2263,6 +2492,23 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// Flash animado nos cards de Top Presentes
+function flashPresentesCard(cardId, color) {
+  const card = document.getElementById(cardId);
+  if (!card) return;
+  const flashClass = `presentes-card-flash-${color}`;
+  const baseClass  = `presentes-card-${color}`;
+  card.classList.remove(flashClass, baseClass);
+  // força reflow para reiniciar a animação
+  void card.offsetWidth;
+  card.classList.add(flashClass);
+  card.addEventListener('animationend', function handler() {
+    card.classList.remove(flashClass);
+    card.classList.add(baseClass);
+    card.removeEventListener('animationend', handler);
+  }, { once: true });
 }
 
 function createEmptyState(icon, text, sub) {
@@ -2533,6 +2779,665 @@ function createEmptyState(icon, text, sub) {
 })();
 
 // ============================================
+// DESEJO DO STREAMER UI
+// ============================================
+(function initDesejo() {
+  // Use Brazil server gifts sorted by diamond value (ascending)
+  const ALL_GIFTS = GIFTS_BR;
+
+  // Restore saved values
+  const nameInput   = document.getElementById('desejo-name');
+  const giftInput   = document.getElementById('desejo-gift-name');
+  const dropdown    = document.getElementById('desejo-gift-dropdown');
+  const targetInput = document.getElementById('desejo-target');
+  const themeSelect = document.getElementById('desejo-theme');
+  const customWrap  = document.getElementById('desejo-custom-color-wrap');
+  const customColor = document.getElementById('desejo-custom-color');
+  const nameColor   = document.getElementById('desejo-name-color');
+  const countColor  = document.getElementById('desejo-count-color');
+  const preview     = document.getElementById('desejo-gift-preview');
+  const progEl      = document.getElementById('desejo-progress-display');
+
+  if (nameInput)   nameInput.value   = desejoConfig.name      || 'Desejo do Streamer';
+  if (giftInput)   giftInput.value   = desejoConfig.giftName  || '';
+  if (targetInput) targetInput.value = desejoConfig.target     || 1;
+  if (themeSelect) themeSelect.value = desejoConfig.theme      || 'neon';
+  if (customColor) customColor.value = desejoConfig.customColor|| '#1a1f2e';
+  if (nameColor)   nameColor.value   = desejoConfig.nameColor  || '#ffffff';
+  if (countColor)  countColor.value  = desejoConfig.countColor || '#ffd700';
+  if (progEl)      progEl.textContent = desejoCurrent + ' / ' + (desejoConfig.target || 1);
+
+  // Show gift preview if saved
+  if (preview && desejoConfig.giftImage) {
+    preview.src = desejoConfig.giftImage;
+    preview.style.display = 'block';
+  }
+
+  // Show/hide custom color
+  function updateCustomWrap() {
+    if (customWrap) customWrap.style.display = (themeSelect && themeSelect.value === 'custom') ? 'flex' : 'none';
+  }
+  updateCustomWrap();
+  if (themeSelect) themeSelect.addEventListener('change', updateCustomWrap);
+
+  // ── Custom gift dropdown ──
+  function renderDropdown(filter) {
+    if (!dropdown) return;
+    const q = (filter || '').trim().toLowerCase();
+    const list = q ? ALL_GIFTS.filter(g => g.name.toLowerCase().includes(q)) : ALL_GIFTS;
+    dropdown.innerHTML = '';
+    if (list.length === 0) {
+      dropdown.innerHTML = '<div style="padding:10px 14px;color:var(--text-secondary);font-size:13px;">Nenhum presente encontrado</div>';
+      return;
+    }
+    list.forEach(g => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:7px 12px;cursor:pointer;border-radius:7px;transition:background 0.15s;';
+      const diamond = g.value !== undefined ? `<span style="font-size:11px;color:#a78bfa;margin-left:auto;padding-left:8px;white-space:nowrap;">${g.value} 💎</span>` : '';
+      row.innerHTML = `<img src="${g.image}" style="width:28px;height:28px;object-fit:contain;flex-shrink:0;"><span style="font-size:13px;color:#fff;flex:1;">${escapeHtml(g.name)}</span>${diamond}`;
+      row.addEventListener('mouseenter', () => row.style.background = 'rgba(255,255,255,0.08)');
+      row.addEventListener('mouseleave', () => row.style.background = '');
+      row.addEventListener('mousedown', (e) => {
+        e.preventDefault(); // prevent input blur before click registers
+        giftInput.value = g.name;
+        if (preview) { preview.src = g.image; preview.style.display = 'block'; }
+        dropdown.style.display = 'none';
+      });
+      dropdown.appendChild(row);
+    });
+  }
+
+  function openDropdown() {
+    if (!dropdown) return;
+    renderDropdown(giftInput ? giftInput.value : '');
+    dropdown.style.display = 'block';
+  }
+
+  function closeDropdown() {
+    if (dropdown) dropdown.style.display = 'none';
+  }
+
+  if (giftInput) {
+    giftInput.addEventListener('focus', () => openDropdown());
+    giftInput.addEventListener('blur',  () => setTimeout(closeDropdown, 150));
+    giftInput.addEventListener('input', () => {
+      openDropdown();
+      // Also update preview for exact match while typing
+      const found = ALL_GIFTS.find(g => g.name.toLowerCase() === giftInput.value.trim().toLowerCase());
+      if (found && preview) { preview.src = found.image; preview.style.display = 'block'; }
+      else if (preview) { preview.src = ''; preview.style.display = 'none'; }
+    });
+  }
+
+  // Save
+  const btnSave = document.getElementById('btn-desejo-save');
+  if (btnSave) {
+    btnSave.addEventListener('click', () => {
+      const giftName = (giftInput ? giftInput.value.trim() : '') || '';
+      const found = GIFTS_BR.find(g => g.name.toLowerCase() === giftName.toLowerCase());
+      const giftImage = found ? found.image : (desejoConfig.giftImage || '');
+      desejoConfig = {
+        name:        (nameInput   ? nameInput.value.trim()   : 'Desejo do Streamer') || 'Desejo do Streamer',
+        giftName,
+        giftImage,
+        target:      Math.max(1, parseInt(targetInput ? targetInput.value : 1) || 1),
+        theme:       themeSelect  ? themeSelect.value  : 'neon',
+        customColor: customColor  ? customColor.value  : '',
+        nameColor:   nameColor    ? nameColor.value    : '#ffffff',
+        countColor:  countColor   ? countColor.value   : '#ffd700'
+      };
+      saveToStorage('desejoConfig', desejoConfig);
+      if (progEl) progEl.textContent = desejoCurrent + ' / ' + desejoConfig.target;
+      if (preview && giftImage) { preview.src = giftImage; preview.style.display = 'block'; }
+      ipcRenderer.send('desejo-config', { ...desejoConfig, current: desejoCurrent });
+      showToast('Desejo salvo! ✔', 'success');
+    });
+  }
+
+  // Reset progress
+  const btnReset = document.getElementById('btn-desejo-reset');
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      const ok = await appConfirm('Resetar o progresso do desejo para 0?');
+      if (!ok) return;
+      desejoCurrent = 0;
+      saveToStorage('desejoCurrent', 0);
+      if (progEl) progEl.textContent = '0 / ' + desejoConfig.target;
+      ipcRenderer.send('desejo-reset');
+    });
+  }
+
+  // Copy URL (now handled by Links tab — nothing to do here)
+  const btnCopy = null;
+  if (btnCopy) {
+    btnCopy.addEventListener('click', () => {
+      const urlEl = null;
+      if (urlEl && urlEl.textContent !== '—') {
+        navigator.clipboard.writeText(urlEl.textContent).then(() => showToast('URL copiada!', 'success'));
+      }
+    });
+  }
+
+  // Push saved state to overlay on startup
+  ipcRenderer.send('desejo-config', { ...desejoConfig, current: desejoCurrent });
+})();
+
+// ============================================
+// ALERTS SYSTEM
+// ============================================
+function generateAlertId() {
+  return 'alert_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+}
+
+function saveAlerts() {
+  saveToStorage('alertsList', alertsList);
+}
+
+const ALERT_TYPE_LABELS = {
+  like:     '❤️ Alerta de Likes',
+  follow:   '👤 Alerta de Seguir',
+  gift:     '🎁 Alerta de Presente',
+  reminder: '⏰ Lembrete Automático'
+};
+
+function renderAlertsList() {
+  const container = document.getElementById('alerts-list');
+  if (!container) return;
+  if (alertsList.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-secondary);font-size:13px;text-align:center;padding:16px;">Nenhum alerta configurado. Clique em "+ Adicionar novo alerta" para começar.</div>';
+    return;
+  }
+  container.innerHTML = '';
+  alertsList.forEach(alert => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--bg-tertiary);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;';
+    card.innerHTML = `
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;color:#fff;font-size:14px;margin-bottom:2px;">${escapeHtml(alert.name)}</div>
+        <div style="font-size:12px;color:var(--text-secondary);">${ALERT_TYPE_LABELS[alert.type] || alert.type} &nbsp;·&nbsp; <span style="color:#a78bfa;">📺 Cena ${alert.scene || 1}</span>${alert.type === 'reminder' ? ` &nbsp;·&nbsp; <span style="color:#fbbf24;">⏱ a cada ${alert.intervalValue || 30} ${alert.intervalUnit === 'minutes' ? 'min' : 'seg'}</span>` : ''}</div>
+        ${alert.type === 'reminder' && alert.reminderText ? `<div style="font-size:11px;color:#a78bfa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;">"${escapeHtml(alert.reminderText)}"</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <label style="font-size:11px;color:var(--text-secondary);white-space:nowrap;">🔊 Volume:</label>
+        <input type="range" min="0" max="100" value="${alert.audioVolume ?? 100}"
+          data-alert-vol="${alert.id}"
+          style="width:80px;accent-color:var(--accent-color);">
+        <label class="btn-add" style="padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap;">
+          🎵 ${alert.audioBase64 ? 'Trocar áudio' : 'Adicionar áudio'}
+          <input type="file" accept="audio/*" data-alert-audio="${alert.id}" style="display:none;">
+        </label>
+        ${alert.audioBase64 ? `<button class="btn-reset" data-alert-remove-audio="${alert.id}" style="padding:5px 8px;font-size:12px;">✖</button>` : ''}
+        <button class="btn-add" data-alert-test="${alert.id}" style="padding:5px 10px;font-size:12px;background:#16a34a;">▶ Testar</button>
+        <button class="btn-add" data-alert-edit="${alert.id}" style="padding:5px 10px;font-size:12px;background:#3b82f6;">✏️ Editar</button>
+        <button class="btn-reset" data-alert-delete="${alert.id}" style="padding:5px 10px;font-size:12px;">🗑️</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  // Volume change
+  container.querySelectorAll('[data-alert-vol]').forEach(input => {
+    input.addEventListener('change', () => {
+      const id = input.dataset.alertVol;
+      const a = alertsList.find(x => x.id === id);
+      if (a) { a.audioVolume = parseInt(input.value); saveAlerts(); }
+    });
+  });
+
+  // Audio file upload
+  container.querySelectorAll('[data-alert-audio]').forEach(fileInput => {
+    fileInput.addEventListener('change', () => {
+      const id = fileInput.dataset.alertAudio;
+      const file = fileInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const a = alertsList.find(x => x.id === id);
+        if (a) {
+          a.audioBase64 = e.target.result;
+          saveAlerts();
+          renderAlertsList();
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // Remove audio
+  container.querySelectorAll('[data-alert-remove-audio]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.alertRemoveAudio;
+      const a = alertsList.find(x => x.id === id);
+      if (a) { a.audioBase64 = null; saveAlerts(); renderAlertsList(); }
+    });
+  });
+
+  // Test
+  container.querySelectorAll('[data-alert-test]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.alertTest;
+      const a = alertsList.find(x => x.id === id);
+      if (!a) return;
+
+      const TEST_PAYLOADS = {
+        like:     { nickname: 'Usuário Teste', profilePic: 'https://ui-avatars.com/api/?name=Teste&background=random&size=128', message: 'Obrigado pelos likes ❤️', giftImage: '', giftCount: 0 },
+        follow:   { nickname: 'Usuário Teste', profilePic: 'https://ui-avatars.com/api/?name=Teste&background=random&size=128', message: 'Obrigado por seguir! ➕', giftImage: '', giftCount: 0 },
+        gift:     { nickname: 'Usuário Teste', profilePic: 'https://ui-avatars.com/api/?name=Teste&background=random&size=128', message: 'Obrigado', giftImage: 'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.png', giftCount: 5 },
+        reminder: { nickname: a.reminderName || '🔔 Lembrete', profilePic: '', message: a.reminderText || a.name, giftImage: '', giftCount: 0 }
+      };
+
+      const payload = TEST_PAYLOADS[a.type] || TEST_PAYLOADS.like;
+
+      // Play audio
+      if (a.audioBase64) {
+        try {
+          const audio = new Audio(a.audioBase64);
+          audio.volume = (a.audioVolume ?? 100) / 100;
+          audio.play().catch(() => {});
+        } catch(e) {}
+      }
+
+      // Send to overlay (with correct scene)
+      ipcRenderer.send('alert-trigger', {
+        alertType: a.type,
+        nickname:  payload.nickname,
+        profilePic: payload.profilePic,
+        message:   payload.message,
+        giftImage: payload.giftImage,
+        giftCount: payload.giftCount || 0,
+        scene:     a.scene || 1
+      });
+
+      showToast(`Testando "${a.name}" no overlay...`, 'info');
+    });
+  });
+
+  // Edit
+  container.querySelectorAll('[data-alert-edit]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.alertEdit;
+      const a = alertsList.find(x => x.id === id);
+      if (a) openAlertModal(a);
+    });
+  });
+
+  // Delete
+  container.querySelectorAll('[data-alert-delete]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.alertDelete;
+      const a = alertsList.find(x => x.id === id);
+      const ok = await appConfirm(`Apagar alerta "${a ? a.name : ''}"?`);
+      if (ok) {
+        if (reminderTimers[id]) { clearInterval(reminderTimers[id]); delete reminderTimers[id]; }
+        alertsList = alertsList.filter(x => x.id !== id);
+        saveAlerts();
+        renderAlertsList();
+      }
+    });
+  });
+}
+
+// ============================================
+// LOGOUT
+// ============================================
+(function initLogout() {
+  const btnLogout    = document.getElementById('btn-logout');
+  const overlay      = document.getElementById('logout-overlay');
+  const btnCancel    = document.getElementById('logout-cancel');
+  const btnConfirm   = document.getElementById('logout-confirm');
+
+  if (!btnLogout || !overlay) return;
+
+  btnLogout.addEventListener('click', () => {
+    overlay.classList.add('open');
+  });
+
+  btnCancel.addEventListener('click', () => {
+    overlay.classList.remove('open');
+  });
+
+  // Close on backdrop click
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+
+  btnConfirm.addEventListener('click', () => {
+    overlay.classList.remove('open');
+    ipcRenderer.send('logout');
+  });
+})();
+
+function toggleReminderFields(type) {
+  const fields = document.getElementById('alert-reminder-fields');
+  if (fields) fields.style.display = type === 'reminder' ? 'block' : 'none';
+}
+
+function openAlertModal(existing) {
+  const overlay = document.getElementById('alert-modal-overlay');
+  const titleEl = document.getElementById('alert-modal-title');
+  const nameInput = document.getElementById('alert-modal-name');
+  const typeSelect = document.getElementById('alert-modal-type');
+  const sceneSelect = document.getElementById('alert-modal-scene');
+  const reminderName = document.getElementById('alert-modal-reminder-name');
+  const reminderText = document.getElementById('alert-modal-reminder-text');
+  const intervalValue = document.getElementById('alert-modal-interval-value');
+  const intervalUnit = document.getElementById('alert-modal-interval-unit');
+  if (!overlay) return;
+  if (existing) {
+    alertModalEditId = existing.id;
+    titleEl.textContent = 'Editar Alerta';
+    nameInput.value = existing.name;
+    typeSelect.value = existing.type;
+    if (sceneSelect)   sceneSelect.value   = String(existing.scene || '1');
+    if (reminderName)  reminderName.value  = existing.reminderName  || '';
+    if (reminderText)  reminderText.value  = existing.reminderText  || '';
+    if (intervalValue) intervalValue.value = existing.intervalValue || 30;
+    if (intervalUnit)  intervalUnit.value  = existing.intervalUnit  || 'seconds';
+  } else {
+    alertModalEditId = null;
+    titleEl.textContent = 'Novo Alerta';
+    nameInput.value = '';
+    typeSelect.value = 'like';
+    if (sceneSelect)   sceneSelect.value   = '1';
+    if (reminderName)  reminderName.value  = '';
+    if (reminderText)  reminderText.value  = '';
+    if (intervalValue) intervalValue.value = 30;
+    if (intervalUnit)  intervalUnit.value  = 'seconds';
+  }
+  toggleReminderFields(typeSelect.value);
+  typeSelect.onchange = () => toggleReminderFields(typeSelect.value);
+  overlay.style.display = 'flex';
+  setTimeout(() => nameInput.focus(), 50);
+}
+
+function closeAlertModal() {
+  const overlay = document.getElementById('alert-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  alertModalEditId = null;
+}
+
+// Modal buttons
+const btnAddAlert = document.getElementById('btn-add-alert');
+if (btnAddAlert) btnAddAlert.addEventListener('click', () => openAlertModal(null));
+
+const btnAlertModalCancel = document.getElementById('alert-modal-cancel');
+if (btnAlertModalCancel) btnAlertModalCancel.addEventListener('click', closeAlertModal);
+
+const btnAlertModalSave = document.getElementById('alert-modal-save');
+if (btnAlertModalSave) btnAlertModalSave.addEventListener('click', () => {
+  const nameInput    = document.getElementById('alert-modal-name');
+  const typeSelect   = document.getElementById('alert-modal-type');
+  const sceneSelect  = document.getElementById('alert-modal-scene');
+  const reminderName = document.getElementById('alert-modal-reminder-name');
+  const reminderText = document.getElementById('alert-modal-reminder-text');
+  const intervalValue= document.getElementById('alert-modal-interval-value');
+  const intervalUnit = document.getElementById('alert-modal-interval-unit');
+  const name  = (nameInput.value || '').trim();
+  const type  = typeSelect.value;
+  const scene = parseInt(sceneSelect ? sceneSelect.value : '1') || 1;
+  if (!name) { nameInput.focus(); return; }
+  const extra = type === 'reminder' ? {
+    reminderName:  (reminderName  ? reminderName.value.trim()  : '') || '🔔 Lembrete',
+    reminderText:  (reminderText  ? reminderText.value.trim()  : '') || name,
+    intervalValue: parseInt(intervalValue ? intervalValue.value : 30) || 30,
+    intervalUnit:  intervalUnit ? intervalUnit.value : 'seconds'
+  } : {};
+  if (alertModalEditId) {
+    const a = alertsList.find(x => x.id === alertModalEditId);
+    if (a) { a.name = name; a.type = type; a.scene = scene; Object.assign(a, extra); }
+  } else {
+    alertsList.push({ id: generateAlertId(), name, type, scene, ...extra, audioBase64: null, audioVolume: 100, enabled: true });
+  }
+  saveAlerts();
+  renderAlertsList();
+  startReminderTimers();
+  closeAlertModal();
+});
+
+// Click outside modal to close
+const alertModalOverlay = document.getElementById('alert-modal-overlay');
+if (alertModalOverlay) {
+  alertModalOverlay.addEventListener('click', (e) => {
+    if (e.target === alertModalOverlay) closeAlertModal();
+  });
+}
+
+// Alert URL now lives in Links tab
+
+// triggerAlerts: called when a TikTok event happens; fires matching alerts
+// bypassDebounce=true skips the cooldown check (used when caller already controls frequency)
+const alertLastFired = {}; // alertId -> timestamp
+function triggerAlerts(eventType, payload, bypassDebounce = false) {
+  const now = Date.now();
+  alertsList.forEach(alert => {
+    if (!alert.enabled) return;
+    if (alert.type !== eventType) return;
+    // Debounce: 2s cooldown per alert (skip for like since threshold logic controls it)
+    if (!bypassDebounce) {
+      const debounceMs = 2000;
+      if (alertLastFired[alert.id] && (now - alertLastFired[alert.id]) < debounceMs) return;
+    }
+    alertLastFired[alert.id] = now;
+    // Play audio locally
+    if (alert.audioBase64) {
+      try {
+        const audio = new Audio(alert.audioBase64);
+        audio.volume = (alert.audioVolume ?? 100) / 100;
+        audio.play().catch(() => {});
+      } catch(e) {}
+    }
+    // Send to overlay
+    ipcRenderer.send('alert-trigger', {
+      alertType: eventType,
+      nickname: payload.nickname || '',
+      profilePic: payload.profilePic || '',
+      message: payload.message || '',
+      giftImage: payload.giftImage || '',
+      giftCount: payload.giftCount || 0,
+      scene: alert.scene || 1
+    });
+  });
+}
+
+// ── Reminder timer management ──
+const reminderTimers = {};
+
+function sendReminderAlert(alert) {
+  if (alert.audioBase64) {
+    try {
+      const audio = new Audio(alert.audioBase64);
+      audio.volume = (alert.audioVolume ?? 100) / 100;
+      audio.play().catch(() => {});
+    } catch(e) {}
+  }
+  ipcRenderer.send('alert-trigger', {
+    alertType: 'reminder',
+    nickname:  alert.reminderName || '🔔 Lembrete',
+    profilePic: '',
+    message:   alert.reminderText || alert.name,
+    giftImage: '',
+    giftCount: 0,
+    scene:     alert.scene || 1
+  });
+}
+
+function startReminderTimers() {
+  // Clear all existing timers first
+  Object.keys(reminderTimers).forEach(id => { clearInterval(reminderTimers[id]); delete reminderTimers[id]; });
+  // Start one timer per reminder alert
+  alertsList.forEach(alert => {
+    if (alert.type !== 'reminder' || alert.enabled === false) return;
+    const ms = (parseInt(alert.intervalValue) || 30) * (alert.intervalUnit === 'minutes' ? 60000 : 1000);
+    reminderTimers[alert.id] = setInterval(() => sendReminderAlert(alert), ms);
+  });
+}
+
+// Theme selector
+(function initAlertTheme() {
+  const sel = document.getElementById('alert-theme-select');
+  const btn = document.getElementById('btn-alert-theme-save');
+  if (!sel) return;
+  sel.value = alertTheme;
+  if (btn) {
+    btn.addEventListener('click', () => {
+      alertTheme = sel.value;
+      saveToStorage('alertTheme', alertTheme);
+      ipcRenderer.send('alert-config', { theme: alertTheme });
+      showToast('Tema do alerta aplicado! ✔', 'success');
+    });
+  }
+  // Apply saved theme on start
+  ipcRenderer.send('alert-config', { theme: alertTheme });
+})();
+
+// Init alerts tab
+renderAlertsList();
+startReminderTimers();
+
+// ============================================
+// GALERIA DE PRESENTES
+// ============================================
+function renderGaleriaList() {
+  const container = document.getElementById('galeria-gift-list');
+  if (!container) return;
+  const gifts = GALERIA_LEAGUES[galeriaConfig.league] || [];
+  container.innerHTML = gifts.map((g, i) => {
+    const curr = galeriaProgress[g.name] || 0;
+    const done = curr >= g.target;
+    return `<div class="galeria-gift-row${done ? ' g-done' : ''}" data-idx="${i}">
+      <img src="${g.image}" alt="${g.name}">
+      <span class="g-name">${g.name}</span>
+      <span class="g-counter">${curr}/${g.target}</span>
+      <button class="g-btn-adj g-btn-dec" data-name="${g.name}" title="Diminuir">−</button>
+      <button class="g-btn-adj g-btn-inc" data-name="${g.name}" title="Aumentar">+</button>
+    </div>`;
+  }).join('');
+
+  container.querySelectorAll('.g-btn-dec').forEach(btn => {
+    btn.addEventListener('click', () => galeriaAdjust(btn.dataset.name, -1));
+  });
+  container.querySelectorAll('.g-btn-inc').forEach(btn => {
+    btn.addEventListener('click', () => galeriaAdjust(btn.dataset.name, +1));
+  });
+}
+
+function galeriaAdjust(giftName, delta) {
+  const gifts = GALERIA_LEAGUES[galeriaConfig.league] || [];
+  const g = gifts.find(x => x.name === giftName);
+  if (!g) return;
+  const curr = galeriaProgress[g.name] || 0;
+  const next = Math.max(0, Math.min(g.target, curr + delta));
+  if (next === curr) return;
+  galeriaProgress[g.name] = next;
+  saveToStorage('galeriaProgress', galeriaProgress);
+  ipcRenderer.send('galeria-progress', { progress: galeriaProgress, giftName: g.name });
+  renderGaleriaList();
+}
+
+function buildGaleriaPayload() {
+  return {
+    league:        galeriaConfig.league,
+    title:         galeriaConfig.title,
+    progress:      galeriaProgress,
+    theme:         galeriaConfig.theme         || 'neon',
+    titleColor:    galeriaConfig.titleColor    || '#ffffff',
+    nameColor:     galeriaConfig.nameColor     || '#00d4ff',
+    counterColor:  galeriaConfig.counterColor  || '#ffd700',
+    customColor:   galeriaConfig.customColor   || '#1a1f2e',
+    completeColor: galeriaConfig.completeColor || '#ffd700'
+  };
+}
+
+(function initGaleria() {
+  // Liga buttons
+  const btnD = document.getElementById('galeria-liga-D');
+  const btnC = document.getElementById('galeria-liga-C');
+
+  function setLeague(league) {
+    galeriaConfig.league = league;
+    saveToStorage('galeriaConfig', galeriaConfig);
+    [btnD, btnC].forEach(b => {
+      if (!b) return;
+      b.classList.toggle('active-liga', b.dataset.liga === league);
+    });
+    renderGaleriaList();
+    ipcRenderer.send('galeria-config', buildGaleriaPayload());
+  }
+  if (btnD) btnD.addEventListener('click', () => setLeague('D'));
+  if (btnC) btnC.addEventListener('click', () => setLeague('C'));
+
+  // Restore saved league button state
+  const savedLeague = galeriaConfig.league || 'D';
+  [btnD, btnC].forEach(b => {
+    if (!b) return;
+    b.classList.toggle('active-liga', b.dataset.liga === savedLeague);
+  });
+
+  // Title input
+  const titleInput = document.getElementById('galeria-title-input');
+  if (titleInput) titleInput.value = galeriaConfig.title || 'Galeria de Presentes';
+
+  // Theme selector
+  const themeSelect = document.getElementById('galeria-theme');
+  const customWrap  = document.getElementById('galeria-custom-color-wrap');
+  const customColor = document.getElementById('galeria-custom-color');
+  if (themeSelect) {
+    themeSelect.value = galeriaConfig.theme || 'neon';
+    if (customWrap) customWrap.style.display = themeSelect.value === 'custom' ? 'flex' : 'none';
+    themeSelect.addEventListener('change', () => {
+      if (customWrap) customWrap.style.display = themeSelect.value === 'custom' ? 'flex' : 'none';
+    });
+  }
+  if (customColor) customColor.value = galeriaConfig.customColor || '#1a1f2e';
+
+  // Color pickers
+  const titleColorPicker    = document.getElementById('galeria-title-color');
+  const nameColorPicker     = document.getElementById('galeria-name-color');
+  const counterColorPicker  = document.getElementById('galeria-counter-color');
+  const completeColorPicker = document.getElementById('galeria-complete-color');
+  if (titleColorPicker)    titleColorPicker.value    = galeriaConfig.titleColor    || '#ffffff';
+  if (nameColorPicker)     nameColorPicker.value     = galeriaConfig.nameColor     || '#00d4ff';
+  if (counterColorPicker)  counterColorPicker.value  = galeriaConfig.counterColor  || '#ffd700';
+  if (completeColorPicker) completeColorPicker.value = galeriaConfig.completeColor || '#ffd700';
+
+  // Save button
+  const btnSave = document.getElementById('btn-galeria-save');
+  if (btnSave) {
+    btnSave.addEventListener('click', () => {
+      if (titleInput)         galeriaConfig.title         = titleInput.value.trim() || 'Galeria de Presentes';
+      if (themeSelect)        galeriaConfig.theme         = themeSelect.value;
+      if (customColor)        galeriaConfig.customColor   = customColor.value;
+      if (titleColorPicker)   galeriaConfig.titleColor    = titleColorPicker.value;
+      if (nameColorPicker)    galeriaConfig.nameColor     = nameColorPicker.value;
+      if (counterColorPicker) galeriaConfig.counterColor  = counterColorPicker.value;
+      if (completeColorPicker) galeriaConfig.completeColor = completeColorPicker.value;
+      saveToStorage('galeriaConfig', galeriaConfig);
+      ipcRenderer.send('galeria-config', buildGaleriaPayload());
+      showToast('Galeria aplicada! ✔', 'success');
+    });
+  }
+
+  // Reset button
+  const btnReset = document.getElementById('btn-galeria-reset');
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      const ok = await appConfirm('Resetar todo o progresso da Galeria?');
+      if (!ok) return;
+      galeriaProgress = {};
+      saveToStorage('galeriaProgress', galeriaProgress);
+      ipcRenderer.send('galeria-reset');
+      renderGaleriaList();
+      showToast('Progresso da Galeria resetado!', 'success');
+    });
+  }
+
+  // Send initial config to overlay on load
+  ipcRenderer.send('galeria-config', buildGaleriaPayload());
+
+  renderGaleriaList();
+})();
+
+// ============================================
 // INIT
 // ============================================
 renderModels();
@@ -2540,3 +3445,33 @@ renderEditMappings();
 renderCoinsRanking();
 renderLikesRanking();
 loadOverlayLinks();
+
+// ============================================
+// AUTO-UPDATER
+// ============================================
+(function initUpdater() {
+  const banner    = document.getElementById('update-banner');
+  const bannerTxt = document.getElementById('update-banner-text');
+  const btnInstall = document.getElementById('btn-install-update');
+  if (!banner) return;
+
+  ipcRenderer.on('update-available', (event, { version }) => {
+    banner.style.display = 'flex';
+    bannerTxt.textContent = `🔄 Nova versão ${version} disponível — baixando...`;
+    btnInstall.style.display = 'none';
+  });
+
+  ipcRenderer.on('update-downloaded', (event, { version }) => {
+    banner.style.display = 'flex';
+    bannerTxt.textContent = `✅ Versão ${version} pronta para instalar!`;
+    btnInstall.style.display = 'inline-block';
+  });
+
+  if (btnInstall) {
+    btnInstall.addEventListener('click', () => {
+      btnInstall.disabled = true;
+      btnInstall.textContent = 'Reiniciando...';
+      ipcRenderer.send('install-update');
+    });
+  }
+})();

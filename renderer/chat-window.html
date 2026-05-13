@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html, body {
+  width:100%; height:100%;
+  background: transparent;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+  overflow: hidden;
+}
+
+/* Janela inteira — transparente com borda fina */
+#wrap {
+  width:100%; height:100vh;
+  display:flex; flex-direction:column;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* TOPBAR — fundo transparente, só ícones e texto visíveis */
+#bar {
+  display:flex; align-items:center; gap:6px;
+  padding:0 8px; height:28px; flex-shrink:0;
+  background: transparent;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  -webkit-app-region: drag;
+}
+#status {
+  flex:1; font-size:11px; font-weight:600;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+.btns { display:flex; gap:3px; -webkit-app-region:no-drag; }
+.btn {
+  width:22px; height:22px; border:none; background:transparent;
+  color:rgba(255,255,255,0.75); cursor:pointer; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  transition: color .12s;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.9));
+}
+.btn:hover { color:#fff; }
+.btn.x:hover { color:#ff6060; }
+
+/* PANEL — aparece com fundo escuro para ser legível */
+#panel {
+  background: rgba(6,6,12,0.96);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  max-height:0; overflow:hidden;
+  transition: max-height .2s ease;
+  flex-shrink:0; -webkit-app-region:no-drag;
+}
+#panel.on { max-height:155px; }
+.pi { padding:10px 12px; display:flex; flex-direction:column; gap:8px; }
+.row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.lbl { font-size:10px; color:rgba(255,255,255,0.35); min-width:56px; }
+.fb { font-size:10px; font-weight:600; padding:2px 9px; border-radius:8px; border:none; cursor:pointer; background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.4); }
+.fb:hover { background:rgba(255,255,255,0.13); color:#fff; }
+.fb.on { background:rgba(255,255,255,0.2); color:#fff; }
+.pp { font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; border:1px solid currentColor; opacity:0.25; }
+.pp.on { opacity:1; }
+.tk{color:#ff2d55} .tw{color:#9146ff} .ki{color:#53fc18} .yt{color:#ff4444}
+.slrow { display:flex; align-items:center; gap:8px; flex:1; }
+input[type=range] { flex:1; accent-color:#00d4ff; cursor:pointer; }
+.sv { font-size:10px; color:rgba(255,255,255,0.5); min-width:30px; text-align:right; }
+.clr { font-size:10px; padding:2px 9px; border-radius:5px; border:1px solid rgba(255,255,255,0.1); background:transparent; color:rgba(255,255,255,0.35); cursor:pointer; margin-left:auto; }
+.clr:hover { background:rgba(255,255,255,0.07); color:#fff; }
+
+/* INTERACTIONS — top resizable area */
+#interactions {
+  overflow-y: auto;
+  padding: 4px 5px;
+  display: flex; flex-direction: column; gap: 1px;
+  background: transparent;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+  min-height: 30px;
+}
+#interactions::-webkit-scrollbar { width:3px; }
+#interactions::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
+
+/* DIVIDER — draggable resize handle */
+#divider {
+  height: 8px; flex-shrink: 0;
+  cursor: row-resize;
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-app-region: no-drag;
+  user-select: none;
+}
+#divider::after {
+  content: '';
+  width: 36px; height: 2px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 2px;
+  transition: background .15s;
+}
+#divider:hover::after, #divider.dragging::after {
+  background: rgba(255,255,255,0.45);
+}
+
+/* MSGS — fundo transparente, texto com sombra pra legibilidade */
+#msgs {
+  flex:1; overflow-y:auto; padding:5px;
+  display:flex; flex-direction:column; gap:1px;
+  background: transparent;
+  -webkit-app-region:no-drag;
+}
+#msgs::-webkit-scrollbar { width:3px; }
+#msgs::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); border-radius:3px; }
+
+.empty {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  flex:1; gap:8px; color:rgba(255,255,255,0.35); font-size:12px; padding:30px 0;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+.empty-int {
+  display:flex; align-items:center; justify-content:center;
+  flex:1; color:rgba(255,255,255,0.2); font-size:10px;
+  padding: 4px 0;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  min-height:20px;
+}
+
+/* CHAT MESSAGE ROW */
+.mrow {
+  display:flex; align-items:baseline; gap:4px;
+  padding:3px 5px; border-radius:4px;
+  font-size:12px; line-height:1.4;
+  animation: mi .1s ease;
+}
+@keyframes mi { from{opacity:0;transform:translateX(-2px)} to{opacity:1;transform:none} }
+
+.mp { font-size:9px; font-weight:800; padding:1px 4px; border-radius:3px; flex-shrink:0; }
+.mp.tiktok  { background:rgba(255,45,85,.3);  color:#ff2d55; }
+.mp.twitch  { background:rgba(145,70,255,.3); color:#bf7fff; }
+.mp.kick    { background:rgba(83,252,24,.3);  color:#53fc18; }
+.mp.youtube { background:rgba(255,68,68,.3);  color:#ff6868; }
+
+.mu {
+  font-weight:700; flex-shrink:0; white-space:nowrap;
+  max-width:110px; overflow:hidden; text-overflow:ellipsis;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+.ms { color:rgba(255,255,255,0.3); }
+.mt {
+  color:rgba(255,255,255,0.92); word-break:break-word;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+
+/* EVENT ROW */
+.erow {
+  display:flex; align-items:center; gap:4px;
+  padding:2px 5px; border-radius:4px;
+  font-size:11px; line-height:1.4;
+  animation: mi .1s ease;
+  background: rgba(255,255,255,0.03);
+}
+.et {
+  font-size:9px; font-weight:700; flex-shrink:0;
+  color:rgba(255,255,255,0.45);
+  white-space:nowrap;
+}
+.eu {
+  font-weight:700; flex-shrink:0; white-space:nowrap;
+  max-width:100px; overflow:hidden; text-overflow:ellipsis;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+}
+.ed {
+  color:rgba(255,255,255,0.4); font-size:10px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  flex:1;
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+
+  <div id="bar">
+    <span id="status">Off-line</span>
+    <div class="btns">
+      <!-- Cadeado -->
+      <button class="btn" id="btnLock" title="Travar">
+        <svg viewBox="0 0 14 16" fill="none" width="13" height="15">
+          <path id="arc" d="M4 7V5a3 3 0 0 1 6 0v2" stroke="rgba(255,255,255,0.85)" stroke-width="1.6" stroke-linecap="round"/>
+          <rect id="bod" x="2" y="7" width="10" height="7" rx="1.8" fill="transparent" stroke="rgba(255,255,255,0.85)" stroke-width="1.3"/>
+          <circle cx="7" cy="10.5" r="1.1" fill="rgba(255,255,255,0.85)"/>
+        </svg>
+      </button>
+      <!-- Engrenagem -->
+      <button class="btn" id="btnGear" title="Configurações">
+        <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+          <circle cx="8" cy="8" r="2.2" stroke="rgba(255,255,255,0.85)" stroke-width="1.4"/>
+          <path stroke="rgba(255,255,255,0.85)" stroke-width="1.4" stroke-linecap="round"
+            d="M8 1.5v1M8 13.5v1M1.5 8h1M13.5 8h1M3.4 3.4l.7.7M11.9 11.9l.7.7M3.4 12.6l.7-.7M11.9 4.1l.7-.7"/>
+        </svg>
+      </button>
+      <!-- Fechar -->
+      <button class="btn x" id="btnClose">✕</button>
+    </div>
+  </div>
+
+  <!-- Painel de config — tem fundo escuro próprio pra ser legível -->
+  <div id="panel">
+    <div class="pi">
+      <div class="row">
+        <span class="lbl">Filtro</span>
+        <button class="fb on" data-f="all">Todos</button>
+        <button class="fb" data-f="tiktok">TikTok</button>
+        <button class="fb" data-f="twitch">Twitch</button>
+        <button class="fb" data-f="kick">Kick</button>
+        <button class="fb" data-f="youtube">YouTube</button>
+      </div>
+      <div class="row">
+        <span class="lbl">Status</span>
+        <span class="pp tk" id="p-tk">TikTok</span>
+        <span class="pp tw" id="p-tw">Twitch</span>
+        <span class="pp ki" id="p-ki">Kick</span>
+        <span class="pp yt" id="p-yt">YouTube</span>
+        <button class="clr" id="btnClr">🗑 Limpar</button>
+      </div>
+      <div class="row">
+        <span class="lbl">Opacidade</span>
+        <div class="slrow">
+          <input type="range" id="sl" min="5" max="100" value="90">
+          <span class="sv" id="sv">90%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERACTIONS — top area for events (gifts, follows, subs, etc.) -->
+  <div id="interactions">
+    <div class="empty-int" id="int-empty">Aguardando eventos...</div>
+  </div>
+
+  <!-- DIVIDER — drag to resize -->
+  <div id="divider"></div>
+
+  <!-- MESSAGES — chat messages area -->
+  <div id="msgs">
+    <div class="empty" id="empty">
+      <div style="font-size:26px">💬</div>
+      <div>Aguardando mensagens...</div>
+    </div>
+  </div>
+
+</div>
+<script>
+const { ipcRenderer } = require('electron');
+
+const bar    = document.getElementById('bar');
+const panel  = document.getElementById('panel');
+const msgs   = document.getElementById('msgs');
+const empty  = document.getElementById('empty');
+const status = document.getElementById('status');
+const sl     = document.getElementById('sl');
+const sv     = document.getElementById('sv');
+const interDiv  = document.getElementById('interactions');
+const intEmpty  = document.getElementById('int-empty');
+const dividerEl = document.getElementById('divider');
+
+let list=[], filter='all', atBottom=true, locked=false;
+const PNAME  = {tiktok:'TikTok',twitch:'Twitch',kick:'Kick',youtube:'YouTube'};
+const PLABEL = {tiktok:'TK',twitch:'TW',kick:'KI',youtube:'YT'};
+const PCOLOR = {tiktok:'#ff6080',twitch:'#bf7fff',kick:'#53fc18',youtube:'#ff6868'};
+const pstate = {tiktok:false,twitch:false,kick:false,youtube:false};
+
+const EVENT_LABELS = {
+  follow:     '→ Seguiu',
+  gift:       '🎁 Presente',
+  subscribe:  '⭐ Inscrito',
+  share:      '↗ Compart.',
+  member:     '👋 Entrou',
+  like:       '❤ Curtiu',
+  sub:        '⭐ Sub',
+  giftsub:    '🎁 Gift Sub',
+  raid:       '⚔ Raid',
+  bits:       '💎 Bits',
+  superchat:  '💛 Super Chat',
+  membership: '🏅 Membro'
+};
+
+// ── Opacidade ────────────────────────────────────────────────────────────────
+const saved = parseFloat(localStorage.getItem('cop')||'90');
+sl.value = saved; applyOp(saved);
+sl.addEventListener('input', ()=>{ applyOp(+sl.value); localStorage.setItem('cop',sl.value); });
+function applyOp(v) {
+  sv.textContent = v+'%';
+  ipcRenderer.send('chat-win-opacity', v/100);
+}
+
+// ── Divider drag (resize interactions area) ───────────────────────────────────
+const savedInterH = parseFloat(localStorage.getItem('interH') || '110');
+interDiv.style.height = savedInterH + 'px';
+
+let isDragging = false, dragStartY = 0, dragStartH = 0;
+
+dividerEl.addEventListener('mousedown', e => {
+  isDragging = true;
+  dragStartY = e.clientY;
+  dragStartH = interDiv.getBoundingClientRect().height;
+  dividerEl.classList.add('dragging');
+  e.preventDefault();
+}, { capture: true });
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const delta = e.clientY - dragStartY;
+  const newH = Math.max(30, Math.min(window.innerHeight - 120, dragStartH + delta));
+  interDiv.style.height = newH + 'px';
+  e.preventDefault();
+}, { capture: true, passive: false });
+
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    dividerEl.classList.remove('dragging');
+    localStorage.setItem('interH', interDiv.getBoundingClientRect().height);
+  }
+}, { capture: true });
+
+// ── Gear ──────────────────────────────────────────────────────────────────────
+document.getElementById('btnGear').addEventListener('click', e=>{
+  e.stopPropagation();
+  const opening = !panel.classList.contains('on');
+  panel.classList.toggle('on');
+  ipcRenderer.send('chat-win-opacity', opening ? Math.max(0.9, +sl.value/100) : +sl.value/100);
+});
+panel.addEventListener('click', e=>e.stopPropagation());
+document.addEventListener('click', ()=>{
+  if (panel.classList.contains('on')) {
+    panel.classList.remove('on');
+    ipcRenderer.send('chat-win-opacity', +sl.value/100);
+  }
+});
+
+// ── Lock ──────────────────────────────────────────────────────────────────────
+const arc = document.getElementById('arc');
+const bod = document.getElementById('bod');
+document.getElementById('btnLock').addEventListener('click', ()=>{
+  locked = !locked;
+  if (locked) {
+    arc.setAttribute('d','M4 7V6.5a3 3 0 0 1 6 0V7');
+    arc.setAttribute('stroke','#ffd700');
+    bod.setAttribute('stroke','#ffd700');
+  } else {
+    arc.setAttribute('d','M4 7V5a3 3 0 0 1 6 0v2');
+    arc.setAttribute('stroke','rgba(255,255,255,0.85)');
+    bod.setAttribute('stroke','rgba(255,255,255,0.85)');
+    ipcRenderer.send('chat-win-ignore-mouse', false);
+  }
+});
+document.addEventListener('mousemove', e=>{
+  if (!locked) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const safe = el && (bar.contains(el)||el===bar||panel.contains(el)||el===panel);
+  ipcRenderer.send('chat-win-ignore-mouse', !safe);
+}, {capture:true});
+document.addEventListener('mouseleave', ()=>{ if(locked) ipcRenderer.send('chat-win-ignore-mouse',true); });
+
+document.getElementById('btnClose').addEventListener('click', ()=>ipcRenderer.send('chat-win-close'));
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+function badge(p,on){
+  pstate[p]=on;
+  const map={tiktok:'tk',twitch:'tw',kick:'ki',youtube:'yt'};
+  const el=document.getElementById('p-'+map[p]); if(el) el.classList.toggle('on',on);
+  const a=Object.entries(pstate).filter(([,v])=>v).map(([k])=>PNAME[k]);
+  status.textContent=a.length?a.join(' · '):'Off-line';
+}
+
+// ── Filtros ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('.fb').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.fb').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); filter=b.dataset.f; rerender();
+  });
+});
+
+// ── Chat messages ─────────────────────────────────────────────────────────────
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function add1(m){
+  if(empty.parentNode) msgs.removeChild(empty);
+  const d=document.createElement('div'); d.className='mrow';
+  const c=m.color||PCOLOR[m.platform]||'#fff';
+  d.innerHTML=
+    `<span class="mp ${esc(m.platform)}">${PLABEL[m.platform]||esc(m.platform)}</span>`+
+    `<span class="mu" style="color:${esc(c)}">${esc(m.username)}</span>`+
+    `<span class="ms">:</span><span class="mt">${esc(m.message)}</span>`;
+  msgs.appendChild(d);
+  if(atBottom) msgs.scrollTop=msgs.scrollHeight;
+}
+
+function addMsg(m){ list.push(m); if(list.length>500)list.shift(); if(filter==='all'||filter===m.platform)add1(m); }
+function rerender(){ msgs.innerHTML=''; const v=filter==='all'?list:list.filter(m=>m.platform===filter); if(!v.length){msgs.appendChild(empty);return;} v.forEach(add1); }
+function clearAll(){ list=[]; msgs.innerHTML=''; msgs.appendChild(empty); }
+
+document.getElementById('btnClr').addEventListener('click', clearAll);
+msgs.addEventListener('scroll', ()=>{ atBottom=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<60; });
+
+// ── Events (gifts, follows, subs, etc.) ──────────────────────────────────────
+let evtList = [];
+
+function addEvent(evt){
+  if(intEmpty && intEmpty.parentNode) interDiv.removeChild(intEmpty);
+  evtList.push(evt);
+  if(evtList.length > 300) evtList.shift();
+
+  const d = document.createElement('div');
+  d.className = 'erow';
+  const c = evt.color || PCOLOR[evt.platform] || '#fff';
+  const label = EVENT_LABELS[evt.eventType] || evt.eventType;
+  d.innerHTML =
+    `<span class="mp ${esc(evt.platform)}">${PLABEL[evt.platform]||esc(evt.platform)}</span>`+
+    `<span class="et">${esc(label)}</span>`+
+    `<span class="eu" style="color:${esc(c)}">${esc(evt.username)}</span>`+
+    (evt.detail ? `<span class="ed">${esc(evt.detail)}</span>` : '');
+  interDiv.appendChild(d);
+  interDiv.scrollTop = interDiv.scrollHeight;
+}
+
+ipcRenderer.on('chat-message',         (_,m)=>addMsg(m));
+ipcRenderer.on('chat-clear',           ()=>clearAll());
+ipcRenderer.on('chat-history',         (_,h)=>{clearAll();h.forEach(addMsg);});
+ipcRenderer.on('chat-platform-status', (_,{platform,connected})=>badge(platform,connected));
+ipcRenderer.on('chat-event',           (_,evt)=>addEvent(evt));
+</script>
+</body>
+</html>

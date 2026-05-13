@@ -1,39 +1,62 @@
 {
-  "name": "tiktok-live-interactive",
+  "name": "live-stream-ins",
   "version": "1.0.0",
-  "description": "TikTok Live Interactive - Controle de lives com presentes",
+  "description": "Live Stream INS - Controle de lives com presentes",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "publish": "electron-builder --publish always"
   },
   "dependencies": {
+    "electron-updater": "^6.8.3",
     "tiktok-live-connector": "^2.1.0"
   },
   "devDependencies": {
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1",
     "electron-packager": "^17.1.2",
+    "jimp": "^0.22.12",
+    "png-to-ico": "^3.0.1",
     "serve": "^14.2.6"
   },
   "build": {
-    "appId": "com.tiktok.live.interactive",
-    "productName": "TikTok Live Interactive",
+    "appId": "com.livestream.ins",
+    "productName": "Live Stream INS",
     "directories": {
       "output": "dist"
     },
     "win": {
-      "target": "portable"
+      "target": "nsis",
+      "icon": "icon.ico"
     },
-    "portable": {
-      "artifactName": "TikTok-Live-Interactive.exe"
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "license": "license.txt",
+      "artifactName": "LiveStreamINS Instalador.exe",
+      "language": "1046"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Gabrielgrauppe",
+      "repo": "LiveStreamINS"
     },
     "files": [
       "main.js",
       "renderer/**/*",
+      "gifts.js",
+      "gifts-br.js",
+      "license.txt",
+      "icon.ico",
+      "icon.png",
       "node_modules/**/*",
       "!node_modules/electron/**",
       "!node_modules/electron-builder/**",
+      "!node_modules/electron-packager/**",
       "!node_modules/serve/**"
     ]
   }

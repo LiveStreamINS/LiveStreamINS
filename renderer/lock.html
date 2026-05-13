@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Stream INS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e1120;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-app-region: drag;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 14px;
+      object-fit: cover;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: #161b2e;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 24px 28px;
+      width: 300px;
+      -webkit-app-region: no-drag;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      background: #0e1120;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 15px;
+      padding: 10px 14px;
+      letter-spacing: 2px;
+      text-align: center;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input:focus { border-color: rgba(140,70,255,0.6); }
+
+    .btn {
+      width: 100%;
+      margin-top: 14px;
+      padding: 11px;
+      background: linear-gradient(135deg, #6a1fd1, #4a0fa0);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    .error {
+      margin-top: 12px;
+      font-size: 12px;
+      color: #ff5555;
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .checking {
+      margin-top: 12px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.3);
+      font-size: 18px;
+      cursor: pointer;
+      -webkit-app-region: no-drag;
+      line-height: 1;
+    }
+    .close-btn:hover { color: #fff; }
+  </style>
+</head>
+<body>
+  <button class="close-btn" onclick="window.electronAPI.close()">✕</button>
+
+  <img class="logo" src="icon.png" onerror="this.style.display='none'">
+  <h1>Live Stream INS</h1>
+  <p class="subtitle">Insira sua chave de acesso</p>
+
+  <div class="card">
+    <label>Chave de acesso</label>
+    <input type="password" id="keyInput" placeholder="••••••••••" autocomplete="off" spellcheck="false">
+    <button class="btn" id="btn">Entrar</button>
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+    const keyInput = document.getElementById('keyInput');
+    const btn = document.getElementById('btn');
+    const errorEl = document.getElementById('error');
+
+    window.electronAPI = {
+      close: () => ipcRenderer.send('lock-close')
+    };
+
+    keyInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') btn.click();
+    });
+
+    // Auto-try saved key on load
+    ipcRenderer.on('try-saved-key', (e, key) => {
+      keyInput.value = key;
+      validate(key, true);
+    });
+
+    btn.addEventListener('click', () => {
+      const key = keyInput.value.trim();
+      if (!key) return;
+      validate(key, false);
+    });
+
+    function validate(key, auto) {
+      btn.disabled = true;
+      errorEl.textContent = '';
+      btn.textContent = 'Verificando...';
+
+      ipcRenderer.send('validate-key', key);
+    }
+
+    ipcRenderer.on('key-result', (e, result) => {
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+      if (result.valid) {
+        btn.textContent = '✓ Acessando...';
+        // Main process will open main window and close this
+      } else if (result.offline) {
+        // Network error but has saved key — main process handles it
+      } else {
+        errorEl.textContent = 'Chave inválida. Verifique e tente novamente.';
+        keyInput.select();
+      }
+    });
+  </script>
+</body>
+</html>

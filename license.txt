@@ -1,0 +1,107 @@
+================================================================================
+         LIVE STREAM INS — CONTRATO DE LICENÇA DE USO DO SOFTWARE (EULA)
+================================================================================
+
+Leia atentamente este Contrato de Licença de Usuário Final ("EULA") antes de
+instalar ou utilizar o software Live Stream INS ("Software").
+
+Ao clicar em "Aceito", instalar ou utilizar o Software, você concorda com todos
+os termos e condições deste contrato. Se não concordar, clique em "Não Aceito"
+e cancele a instalação.
+
+--------------------------------------------------------------------------------
+1. CONCESSÃO DE LICENÇA
+--------------------------------------------------------------------------------
+
+Este Software é licenciado, não vendido. O desenvolvedor concede ao usuário uma
+licença pessoal, intransferível e não exclusiva de uso do Software, vinculada à
+conta cadastrada no sistema.
+
+O acesso ao Software está condicionado a uma assinatura ativa. Sem assinatura
+válida, o Software não funcionará.
+
+--------------------------------------------------------------------------------
+2. RESTRIÇÕES DE USO
+--------------------------------------------------------------------------------
+
+É estritamente proibido:
+
+  a) Copiar, modificar, distribuir, revender ou sublicenciar o Software ou
+     qualquer parte dele;
+
+  b) Fazer engenharia reversa, descompilar, desmontar ou tentar extrair o
+     código-fonte do Software;
+
+  c) Compartilhar credenciais de acesso com terceiros;
+
+  d) Utilizar o Software para fins ilegais ou que violem os Termos de Serviço
+     do TikTok ou de qualquer outra plataforma integrada;
+
+  e) Remover, alterar ou ocultar avisos de direitos autorais ou marcas
+     presentes no Software.
+
+--------------------------------------------------------------------------------
+3. PROTEÇÃO CONTRA PIRATARIA E ADULTERAÇÃO — AVISO LEGAL
+--------------------------------------------------------------------------------
+
+O Live Stream INS possui sistema de verificação de autenticidade e integridade.
+
+ATENÇÃO: Qualquer tentativa de burlar, falsificar, adulterar ou contornar o
+sistema de autenticação, licença ou assinatura deste Software constitui:
+
+  • Violação da Lei nº 9.609/1998 (Lei de Software), com pena de detenção de
+    3 meses a 1 ano ou multa;
+
+  • Violação da Lei nº 9.610/1998 (Lei de Direitos Autorais);
+
+  • Potencial enquadramento em crimes de fraude (Art. 171 do Código Penal
+    Brasileiro) e acesso não autorizado a sistemas (Lei nº 12.737/2012 —
+    Lei Carolina Dieckmann), com penas de reclusão.
+
+O desenvolvedor reserva-se o direito de tomar todas as medidas legais cabíveis
+contra usuários que violarem estas disposições.
+
+--------------------------------------------------------------------------------
+4. COLETA DE DADOS
+--------------------------------------------------------------------------------
+
+O Software coleta dados mínimos necessários para o funcionamento do sistema de
+assinatura, incluindo: nome de usuário, endereço de e-mail e endereço IP.
+Esses dados são utilizados exclusivamente para autenticação e prevenção de
+fraudes, e não são compartilhados com terceiros.
+
+--------------------------------------------------------------------------------
+5. ISENÇÃO DE GARANTIAS
+--------------------------------------------------------------------------------
+
+O Software é fornecido "como está", sem garantias de qualquer tipo, expressas
+ou implícitas. O desenvolvedor não se responsabiliza por danos diretos,
+indiretos, incidentais ou consequentes decorrentes do uso do Software.
+
+--------------------------------------------------------------------------------
+6. ATUALIZAÇÕES
+--------------------------------------------------------------------------------
+
+O Software pode ser atualizado automaticamente para corrigir falhas ou
+adicionar funcionalidades. Ao aceitar este contrato, você autoriza a instalação
+dessas atualizações.
+
+--------------------------------------------------------------------------------
+7. RESCISÃO
+--------------------------------------------------------------------------------
+
+Esta licença é rescindida automaticamente em caso de violação de qualquer termo
+deste contrato. Ao término, o usuário deve desinstalar e deixar de usar o
+Software.
+
+--------------------------------------------------------------------------------
+8. FORO
+--------------------------------------------------------------------------------
+
+Este contrato é regido pelas leis da República Federativa do Brasil. Fica
+eleito o foro da comarca de domicílio do desenvolvedor para dirimir quaisquer
+controvérsias.
+
+================================================================================
+          © 2026 Live Stream INS. Todos os direitos reservados.
+================================================================================

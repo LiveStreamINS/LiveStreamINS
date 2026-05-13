@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Stream INS</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e1120;
+      color: #e2e8f0;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* ── TITLE BAR ── */
+    .titlebar {
+      height: 36px;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      -webkit-app-region: drag;
+      flex-shrink: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .tb-left { display: flex; align-items: center; gap: 8px; }
+    .tb-icon { width: 20px; height: 20px; object-fit: contain; }
+    .tb-title { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 500; letter-spacing: 0.3px; }
+    .tb-close {
+      width: 28px; height: 28px; border-radius: 6px; border: none;
+      background: transparent; color: rgba(255,255,255,0.35); cursor: pointer;
+      font-size: 13px; display: flex; align-items: center; justify-content: center;
+      -webkit-app-region: no-drag; transition: background 0.15s, color 0.15s;
+    }
+    .tb-close:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
+
+    /* ── CONTENT ── */
+    .content {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 16px 20px 20px; overflow-y: auto;
+    }
+
+    /* ── LOGO ── */
+    .logo-area { text-align: center; margin-bottom: 14px; margin-top: 4px; }
+    .logo-img {
+      width: 70px; height: 70px; object-fit: contain;
+      display: block; margin: 0 auto 8px;
+      filter: drop-shadow(0 0 18px rgba(120,80,220,0.55));
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+    @keyframes logoPulse {
+      0%,100% { filter: drop-shadow(0 0 14px rgba(100,60,200,0.45)); }
+      50%      { filter: drop-shadow(0 0 30px rgba(140,90,255,0.8)); }
+    }
+    .logo-name { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .logo-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 3px; }
+
+    /* ── CARD ── */
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px; padding: 20px;
+      width: 100%; max-width: 340px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; background: rgba(0,0,0,0.3);
+      border-radius: 10px; padding: 3px; margin-bottom: 22px;
+    }
+    .tab {
+      flex: 1; padding: 8px; text-align: center; font-size: 13px;
+      font-weight: 600; border-radius: 8px; cursor: pointer;
+      color: rgba(255,255,255,0.4); transition: all 0.2s;
+      border: none; background: transparent; font-family: 'Segoe UI', sans-serif;
+    }
+    .tab.active { background: linear-gradient(135deg, #6d28d9, #a78bfa); color: #fff; }
+    .tab:not(.active):hover { color: rgba(255,255,255,0.7); }
+
+    /* ── LOADING BAR ── */
+    .loading-bar {
+      height: 2px; margin-bottom: 16px; border-radius: 2px;
+      background: linear-gradient(90deg, #7c3aed, #a78bfa, #7c3aed);
+      background-size: 200% 100%;
+      animation: loadSlide 1.2s linear infinite;
+      display: none;
+    }
+    .loading-bar.show { display: block; }
+    @keyframes loadSlide { 0% { background-position: 200% 0; } 100% { background-position: 0% 0; } }
+
+    /* ── ERROR ── */
+    .error-box {
+      background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 12px; color: #fca5a5;
+      margin-bottom: 14px; display: none; line-height: 1.4;
+    }
+    .error-box.show { display: block; }
+
+    /* ── FIELDS ── */
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 11px; color: rgba(255,255,255,0.45); margin-bottom: 4px; font-weight: 500; }
+    .field input {
+      width: 100%; padding: 9px 13px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9px; color: #e2e8f0;
+      font-size: 13px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .field input:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+    }
+    .field input::placeholder { color: rgba(255,255,255,0.18); }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      width: 100%; padding: 11px;
+      background: linear-gradient(135deg, #6d28d9, #a78bfa);
+      border: none; border-radius: 9px; color: #fff;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      font-family: 'Segoe UI', sans-serif;
+      letter-spacing: 0.2px;
+    }
+    .btn-submit:hover:not(:disabled) { opacity: 0.88; }
+    .btn-submit:active:not(:disabled) { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── SUCCESS ── */
+    .success-area {
+      text-align: center; padding: 16px 0; display: none;
+    }
+    .success-area.show { display: block; }
+    .success-icon { font-size: 52px; margin-bottom: 12px; animation: successPop 0.4s cubic-bezier(0.175,0.885,0.32,1.275); }
+    @keyframes successPop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+    .success-text { font-size: 16px; font-weight: 700; color: #4ade80; }
+    .success-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 6px; }
+
+    /* ── VALIDATING ── */
+    .validating-area {
+      text-align: center; padding: 20px 0; display: none;
+    }
+    .validating-area.show { display: block; }
+    .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(167,139,250,0.2);
+      border-top-color: #a78bfa;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .validating-text { font-size: 13px; color: rgba(255,255,255,0.45); }
+  </style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="tb-left">
+    <img class="tb-icon" src="logo-ls.png" alt="LS">
+    <span class="tb-title">Live Stream INS</span>
+  </div>
+  <button class="tb-close" id="btn-close">✕</button>
+</div>
+
+<div class="content">
+  <div class="logo-area">
+    <img class="logo-img" src="logo-ls.png" alt="Live Stream INS">
+    <div class="logo-name">Live Stream INS</div>
+    <div class="logo-sub" id="logo-sub">Acesse sua conta para continuar</div>
+  </div>
+
+  <div class="card">
+
+    <!-- Auto-login validation -->
+    <div class="validating-area show" id="validating-area">
+      <div class="spinner"></div>
+      <div class="validating-text">Verificando sessão...</div>
+    </div>
+
+    <!-- Loading bar -->
+    <div class="loading-bar" id="loading-bar"></div>
+
+    <!-- Error -->
+    <div class="error-box" id="error-box"></div>
+
+    <!-- Success -->
+    <div class="success-area" id="success-area">
+      <div class="success-icon">✅</div>
+      <div class="success-text">Entrando...</div>
+      <div class="success-sub">Aguarde um momento</div>
+    </div>
+
+    <!-- Main form -->
+    <div id="form-area" style="display:none;">
+      <div class="tabs">
+        <button class="tab active" id="tab-login" onclick="switchTab('login')">Fazer Login</button>
+        <button class="tab" id="tab-register" onclick="switchTab('register')">Criar Conta</button>
+      </div>
+
+      <div class="field">
+        <label>Nome de usuário</label>
+        <input type="text" id="inp-username" placeholder="seunome" autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field" id="field-email" style="display:none;">
+        <label>Email</label>
+        <input type="email" id="inp-email" placeholder="seu@email.com" autocomplete="email" spellcheck="false">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="inp-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="field" id="field-confirm" style="display:none;">
+        <label>Confirmar senha</label>
+        <input type="password" id="inp-confirm" placeholder="••••••••" autocomplete="new-password">
+      </div>
+
+      <button class="btn-submit" id="btn-submit">Entrar</button>
+      <div style="text-align:center;margin-top:12px;">
+        <button id="btn-forgot" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;font-family:'Segoe UI',sans-serif;" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">Esqueci minha senha</button>
+      </div>
+    </div>
+
+    <!-- Forgot password - step 1: enter email -->
+    <div id="forgot-area" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;">Recuperar senha</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);">Digite o email da sua conta e enviaremos um código.</div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="inp-forgot-email" placeholder="seu@email.com" spellcheck="false">
+      </div>
+      <button class="btn-submit" id="btn-send-code">Enviar código</button>
+      <div style="text-align:center;margin-top:12px;">
+        <button onclick="showArea('form')" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;font-family:'Segoe UI',sans-serif;" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">← Voltar ao login</button>
+      </div>
+    </div>
+
+    <!-- Forgot password - step 2: enter code + new password -->
+    <div id="code-area" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;">Código enviado! ✉️</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);">Verifique seu email e digite o código de 6 dígitos.</div>
+      </div>
+      <div class="field">
+        <label>Código</label>
+        <input type="text" id="inp-code" placeholder="000000" maxlength="6" style="letter-spacing:6px;font-size:20px;text-align:center;">
+      </div>
+      <div class="field">
+        <label>Nova senha</label>
+        <input type="password" id="inp-new-password" placeholder="••••••••">
+      </div>
+      <div class="field">
+        <label>Confirmar nova senha</label>
+        <input type="password" id="inp-new-confirm" placeholder="••••••••">
+      </div>
+      <button class="btn-submit" id="btn-reset-password">Redefinir senha</button>
+      <div style="text-align:center;margin-top:12px;">
+        <button onclick="showArea('forgot')" style="background:none;border:none;color:rgba(255,255,255,0.35);font-size:12px;cursor:pointer;font-family:'Segoe UI',sans-serif;" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">← Reenviar código</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const { ipcRenderer } = require('electron');
+
+  let mode = 'login'; // 'login' | 'register'
+  let forgotEmail = '';
+
+  // ── Close ──
+  document.getElementById('btn-close').addEventListener('click', () => {
+    ipcRenderer.send('login-close');
+  });
+
+  // ── Area switcher ──
+  function showArea(area) {
+    document.getElementById('form-area').style.display   = area === 'form'   ? 'block' : 'none';
+    document.getElementById('forgot-area').style.display = area === 'forgot' ? 'block' : 'none';
+    document.getElementById('code-area').style.display   = area === 'code'   ? 'block' : 'none';
+    showError('');
+  }
+
+  // ── Tab switch ──
+  function switchTab(tab) {
+    mode = tab;
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('field-email').style.display   = tab === 'register' ? '' : 'none';
+    document.getElementById('field-confirm').style.display = tab === 'register' ? '' : 'none';
+    document.getElementById('btn-forgot').style.display    = tab === 'login' ? '' : 'none';
+    document.getElementById('btn-submit').textContent = tab === 'login' ? 'Entrar' : 'Criar Conta';
+    document.getElementById('logo-sub').textContent = tab === 'login'
+      ? 'Acesse sua conta para continuar'
+      : 'Crie sua conta gratuitamente';
+    showError('');
+    if (tab === 'login') document.getElementById('inp-username').focus();
+  }
+
+  // ── Helpers ──
+  function showError(msg) {
+    const el = document.getElementById('error-box');
+    el.textContent = msg;
+    el.classList.toggle('show', !!msg);
+  }
+
+  function setLoading(on, btnId) {
+    document.getElementById('loading-bar').classList.toggle('show', on);
+    const btn = document.getElementById(btnId || 'btn-submit');
+    if (btn) btn.disabled = on;
+  }
+
+  function showSuccess() {
+    document.getElementById('form-area').style.display = 'none';
+    document.getElementById('forgot-area').style.display = 'none';
+    document.getElementById('code-area').style.display = 'none';
+    document.getElementById('success-area').classList.add('show');
+  }
+
+  function showForm() {
+    document.getElementById('validating-area').classList.remove('show');
+    showArea('form');
+    document.getElementById('inp-username').focus();
+  }
+
+  // ── Submit login/register ──
+  function submit() {
+    const username = document.getElementById('inp-username').value.trim();
+    const password = document.getElementById('inp-password').value;
+    const confirm  = document.getElementById('inp-confirm').value;
+    const email    = document.getElementById('inp-email').value.trim();
+
+    if (!username) { showError('Digite o nome de usuário'); return; }
+    if (!password)  { showError('Digite a senha'); return; }
+
+    if (mode === 'register') {
+      if (username.length < 3) { showError('Nome deve ter pelo menos 3 caracteres'); return; }
+      if (!email || !email.includes('@')) { showError('Digite um email válido'); return; }
+      if (password.length < 6) { showError('Senha deve ter pelo menos 6 caracteres'); return; }
+      if (password !== confirm) { showError('As senhas não coincidem'); return; }
+      setLoading(true);
+      ipcRenderer.send('account-register', { username, password, email });
+    } else {
+      setLoading(true);
+      ipcRenderer.send('account-login', { username, password });
+    }
+  }
+
+  document.getElementById('btn-submit').addEventListener('click', submit);
+
+  ['inp-username', 'inp-password', 'inp-confirm', 'inp-email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  });
+
+  // ── Forgot password ──
+  document.getElementById('btn-forgot').addEventListener('click', () => {
+    showArea('forgot');
+    document.getElementById('inp-forgot-email').focus();
+  });
+
+  document.getElementById('btn-send-code').addEventListener('click', async () => {
+    const email = document.getElementById('inp-forgot-email').value.trim();
+    if (!email || !email.includes('@')) { showError('Digite um email válido'); return; }
+    setLoading(true, 'btn-send-code');
+    ipcRenderer.send('forgot-password', { email });
+  });
+
+  document.getElementById('btn-reset-password').addEventListener('click', async () => {
+    const code = document.getElementById('inp-code').value.trim();
+    const newPassword = document.getElementById('inp-new-password').value;
+    const newConfirm  = document.getElementById('inp-new-confirm').value;
+    if (!code || code.length !== 6) { showError('Digite o código de 6 dígitos'); return; }
+    if (!newPassword || newPassword.length < 6) { showError('Senha deve ter pelo menos 6 caracteres'); return; }
+    if (newPassword !== newConfirm) { showError('As senhas não coincidem'); return; }
+    setLoading(true, 'btn-reset-password');
+    ipcRenderer.send('reset-password', { email: forgotEmail, code, newPassword });
+  });
+
+  // ── Result from main process ──
+  ipcRenderer.on('account-result', (event, result) => {
+    setLoading(false);
+    if (result.ok) {
+      showSuccess();
+    } else {
+      showError(result.error || 'Ocorreu um erro. Tente novamente.');
+    }
+  });
+
+  ipcRenderer.on('forgot-result', (event, result) => {
+    setLoading(false, 'btn-send-code');
+    if (result.ok) {
+      forgotEmail = document.getElementById('inp-forgot-email').value.trim();
+      showArea('code');
+      showError('');
+    } else {
+      showError(result.error || 'Erro ao enviar email.');
+    }
+  });
+
+  ipcRenderer.on('reset-result', (event, result) => {
+    setLoading(false, 'btn-reset-password');
+    if (result.ok) {
+      showError('');
+      showArea('form');
+      switchTab('login');
+      // show brief success msg
+      const eb = document.getElementById('error-box');
+      eb.textContent = '✅ Senha redefinida! Faça login com a nova senha.';
+      eb.style.background = 'rgba(74,222,128,0.1)';
+      eb.style.borderColor = 'rgba(74,222,128,0.3)';
+      eb.style.color = '#4ade80';
+      eb.classList.add('show');
+    } else {
+      showError(result.error || 'Erro ao redefinir senha.');
+    }
+  });
+
+  // ── Auto-login: ask main to validate saved token ──
+  ipcRenderer.send('account-check-session');
+
+  ipcRenderer.on('session-invalid', () => {
+    showForm();
+  });
+</script>
+</body>
+</html>

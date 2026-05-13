@@ -20,6 +20,12 @@
     </div>
   </div>
 
+  <!-- UPDATE BANNER -->
+  <div id="update-banner" style="display:none;align-items:center;justify-content:space-between;padding:6px 14px;background:linear-gradient(90deg,#1e1b4b,#312e81);border-bottom:1px solid rgba(167,139,250,0.25);font-size:12px;color:#c4b5fd;gap:10px;">
+    <span id="update-banner-text">🔄 Nova atualização disponível...</span>
+    <button id="btn-install-update" style="display:none;padding:4px 12px;background:#7c3aed;border:none;border-radius:6px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Segoe UI',sans-serif;">Instalar agora</button>
+  </div>
+
   <!-- CONNECTION BAR -->
   <div class="connection-bar">
     <div class="connection-left">
@@ -65,7 +71,24 @@
         <span class="pulse-dot"></span>
         <span>LIVE</span>
       </div>
+      <button class="btn-logout" id="btn-logout" title="Sair da conta">
+        <span class="logout-icon">⏻</span>
+        <span class="logout-label">Sair</span>
+      </button>
     </nav>
+
+    <!-- LOGOUT MODAL -->
+    <div class="logout-overlay" id="logout-overlay">
+      <div class="logout-modal">
+        <div class="logout-modal-icon">⏻</div>
+        <div class="logout-modal-title">Sair da conta</div>
+        <div class="logout-modal-desc">Você será desconectado e precisará fazer login novamente ao abrir o app.</div>
+        <div class="logout-modal-btns">
+          <button class="logout-btn-cancel" id="logout-cancel">Cancelar</button>
+          <button class="logout-btn-confirm" id="logout-confirm">Sair</button>
+        </div>
+      </div>
+    </div>
 
     <!-- CONTENT AREA -->
     <div class="content">
@@ -143,6 +166,7 @@
           <button class="ranking-tab" data-ranking="membros">👥 Membros</button>
           <button class="ranking-tab" data-ranking="top-score">🏆 Top pontuação</button>
           <button class="ranking-tab" data-ranking="top-presentes">🎁 TOP PRESENTES</button>
+          <button class="ranking-tab" data-ranking="alertas">🔔 Alertas!</button>
         </div>
         <div class="ranking-controls">
         </div>
@@ -153,11 +177,11 @@
               <select id="coins-theme-select" class="form-input small-input">
                 <option value="clean">🔲 Limpo (Transparente)</option>
                 <option value="neon">⚡ Neon</option>
-                <option value="medieval">⚔️ Medieval</option>
+                <option value="medieval">⚔️ Dourado</option>
                 <option value="retro">👾 Retro</option>
                 <option value="fire">🔥 Fogo</option>
                 <option value="ice">❄️ Gelo</option>
-                <option value="velho-oeste">🤠 Velho Oeste</option>
+                <option value="royalty">💜 Roxo</option>
                 <option value="custom">🎨 Cor Personalizada</option>
               </select>
             </div>
@@ -191,11 +215,11 @@
               <select id="likes-theme-select" class="form-input small-input">
                 <option value="clean">🔲 Limpo (Transparente)</option>
                 <option value="neon">⚡ Neon</option>
-                <option value="medieval">⚔️ Medieval</option>
+                <option value="medieval">⚔️ Dourado</option>
                 <option value="retro">👾 Retro</option>
                 <option value="fire">🔥 Fogo</option>
                 <option value="ice">❄️ Gelo</option>
-                <option value="velho-oeste">🤠 Velho Oeste</option>
+                <option value="royalty">💜 Roxo</option>
                 <option value="custom">🎨 Cor Personalizada</option>
               </select>
             </div>
@@ -231,11 +255,11 @@
               <select id="points-theme-select" class="form-input small-input">
                 <option value="clean">🔲 Limpo (Transparente)</option>
                 <option value="neon">⚡ Neon</option>
-                <option value="medieval">⚔️ Medieval</option>
+                <option value="medieval">⚔️ Dourado</option>
                 <option value="retro">👾 Retro</option>
                 <option value="fire">🔥 Fogo</option>
                 <option value="ice">❄️ Gelo</option>
-                <option value="royalty">👑 Royalty</option>
+                <option value="royalty">💜 Roxo</option>
                 <option value="custom">🎨 Cor Personalizada</option>
               </select>
             </div>
@@ -299,11 +323,11 @@
               <select id="jar-theme-select" class="form-input small-input">
                 <option value="clean">🔲 Limpo</option>
                 <option value="neon">⚡ Neon</option>
-                <option value="medieval">⚔️ Medieval</option>
+                <option value="medieval">⚔️ Dourado</option>
                 <option value="retro">👾 Retro</option>
                 <option value="fire">🔥 Fogo</option>
                 <option value="ice">❄️ Gelo</option>
-
+                <option value="royalty">💜 Roxo</option>
                 <option value="custom">🎨 Cor Personalizada</option>
               </select>
             </div>
@@ -376,10 +400,11 @@
                 <label>Tema Visual</label>
                 <select id="sb-theme-select" class="form-input">
                   <option value="neon">⚡ Neon (Azul & Rosa)</option>
-                  <option value="medieval">⚔️ Medieval (Dourado)</option>
+                  <option value="medieval">⚔️ Dourado</option>
                   <option value="retro">👾 Retro/Arcade (Pixel)</option>
                   <option value="fire">🔥 Fogo (Laranja)</option>
                   <option value="ice">❄️ Gelo (Azul Claro)</option>
+                  <option value="royalty">💜 Roxo</option>
                   <option value="custom">🎨 Cor Personalizada</option>
                 </select>
               </div>
@@ -444,11 +469,11 @@
               <label>Tema Visual</label>
               <select id="timer-theme-select" class="form-input">
                 <option value="neon">⚡ Neon (Azul & Rosa)</option>
-                <option value="medieval">⚔️ Medieval (Dourado)</option>
+                <option value="medieval">⚔️ Dourado</option>
                 <option value="retro">👾 Retro/Arcade (Pixel)</option>
                 <option value="fire">🔥 Fogo (Laranja)</option>
                 <option value="ice">❄️ Gelo (Azul Claro)</option>
-
+                <option value="royalty">💜 Roxo</option>
                 <option value="custom">🎨 Cor Personalizada</option>
               </select>
             </div>
@@ -498,9 +523,9 @@
                   <option value="neon">⚡ Neon (Azul)</option>
                   <option value="fire">🔥 Fogo</option>
                   <option value="ice">❄️ Gelo</option>
-                  <option value="medieval">⚔️ Medieval</option>
+                  <option value="medieval">⚔️ Dourado</option>
                   <option value="retro">👾 Retro</option>
-                  <option value="royalty">👑 Realeza</option>
+                  <option value="royalty">💜 Roxo</option>
                   <option value="custom">🎨 Cor Personalizada</option>
                 </select>
               </div>
@@ -553,9 +578,9 @@
                   <option value="neon">⚡ Neon (Rosa)</option>
                   <option value="fire">🔥 Fogo</option>
                   <option value="ice">❄️ Gelo</option>
-                  <option value="medieval">⚔️ Medieval</option>
+                  <option value="medieval">⚔️ Dourado</option>
                   <option value="retro">👾 Retro</option>
-                  <option value="royalty">👑 Realeza</option>
+                  <option value="royalty">💜 Roxo</option>
                   <option value="custom">🎨 Cor Personalizada</option>
                 </select>
               </div>
@@ -587,8 +612,9 @@
             <div style="margin-bottom:10px;">
               <label style="font-size:11px;color:var(--text-secondary);display:block;margin-bottom:4px;">Link do LivePix</label>
               <div style="display:flex;gap:8px;">
-                <input type="text" id="goal-pix-livepix-url" placeholder="https://livepix.gg/seuusuario" class="form-input" style="flex:1;">
+                <input type="text" id="goal-pix-livepix-url" placeholder="https://widget.livepix.gg/embed/..." class="form-input" style="flex:1;">
                 <button class="btn-add" id="btn-goal-pix-connect" style="white-space:nowrap;">🔗 Conectar</button>
+                <button class="btn-add" id="btn-goal-pix-disconnect" style="white-space:nowrap;display:none;background:#ef4444;">✖ Desconectar</button>
               </div>
               <div id="goal-pix-livepix-status" style="font-size:11px;margin-top:4px;color:var(--text-secondary);"></div>
             </div>
@@ -616,9 +642,9 @@
                   <option value="neon">⚡ Neon</option>
                   <option value="fire">🔥 Fogo</option>
                   <option value="ice">❄️ Gelo</option>
-                  <option value="medieval">⚔️ Medieval</option>
+                  <option value="medieval">⚔️ Dourado</option>
                   <option value="retro">👾 Retro</option>
-                  <option value="royalty">👑 Realeza</option>
+                  <option value="royalty">💜 Roxo</option>
                   <option value="custom">🎨 Cor Personalizada</option>
                 </select>
               </div>
@@ -688,6 +714,24 @@
             <div style="margin-bottom:12px;">
               <label style="font-size:11px;color:var(--text-secondary);">URL da foto (preenchida automaticamente ao buscar)</label>
               <input type="text" id="ts-avatar" placeholder="https://..." class="form-input" value="">
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <label style="font-size:11px;color:var(--text-secondary);">Tema</label>
+              <select id="ts-theme-select" class="form-input">
+                <option value="dourado">⚔️ Dourado</option>
+                <option value="neon">🌈 Neon</option>
+                <option value="retro">👾 Retro</option>
+                <option value="fire">🔥 Fire</option>
+                <option value="ice">❄️ Ice</option>
+                <option value="roxo">💜 Roxo</option>
+                <option value="clean">🪟 Clean</option>
+                <option value="custom">🎨 Customizado</option>
+              </select>
+            </div>
+            <div id="ts-custom-wrap" style="display:none;margin-bottom:10px;">
+              <label style="font-size:11px;color:var(--text-secondary);">Cor Customizada</label>
+              <input type="color" id="ts-custom-color" value="#9b5de5" style="width:100%;height:36px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
             </div>
 
             <button class="btn-add" id="btn-ts-save" style="width:100%;">💾 Salvar e Enviar ao Overlay</button>
@@ -767,6 +811,196 @@
                 <div id="tp-combo-sender" style="font-size:11px;color:var(--text-secondary);">Aguardando...</div>
               </div>
             </div>
+            <!-- DESEJO DO STREAMER -->
+            <div id="card-desejo" class="presentes-card presentes-card-purple">
+              <h4 style="margin:0 0 12px;color:#a855f7;">🌟 Desejo do Streamer</h4>
+
+              <!-- Nome -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Nome:</label>
+                <input type="text" id="desejo-name" class="form-input" style="flex:1;" placeholder="Ex: Desejo do Streamer" value="Desejo do Streamer">
+              </div>
+
+              <!-- Presente -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Presente:</label>
+                <div style="flex:1;position:relative;">
+                  <input type="text" id="desejo-gift-name" class="form-input" style="width:100%;" placeholder="🔍 Digite para filtrar..." autocomplete="off">
+                  <div id="desejo-gift-dropdown" style="
+                    display:none;position:absolute;top:100%;left:0;right:0;z-index:9999;
+                    background:var(--bg-secondary);border:1px solid rgba(255,255,255,0.12);
+                    border-radius:10px;margin-top:4px;
+                    max-height:220px;overflow-y:auto;
+                    box-shadow:0 8px 32px rgba(0,0,0,0.6);
+                  "></div>
+                </div>
+                <img id="desejo-gift-preview" src="" style="width:36px;height:36px;object-fit:contain;display:none;border-radius:6px;">
+              </div>
+
+              <!-- Quantidade -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Quantidade:</label>
+                <input type="number" id="desejo-target" class="form-input" style="width:80px;" min="1" max="999" value="1">
+              </div>
+
+              <!-- Tema -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Tema:</label>
+                <select id="desejo-theme" class="form-input" style="flex:1;">
+                  <option value="neon">⚡ Neon</option>
+                  <option value="roxo">💜 Roxo</option>
+                  <option value="medieval">⚔️ Dourado</option>
+                  <option value="retro">👾 Retro</option>
+                  <option value="fire">🔥 Fogo</option>
+                  <option value="ice">❄️ Gelo</option>
+                  <option value="clean">🔲 Transparente</option>
+                  <option value="custom">🎨 Cor Personalizada</option>
+                </select>
+              </div>
+
+              <!-- Cor personalizada -->
+              <div id="desejo-custom-color-wrap" style="display:none;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Cor fundo:</label>
+                <input type="color" id="desejo-custom-color" value="#1a1f2e" style="width:42px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <!-- Cor do nome e contador -->
+              <div style="display:flex;gap:16px;margin-bottom:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <label style="font-size:12px;color:var(--text-secondary);">Cor do nome:</label>
+                  <input type="color" id="desejo-name-color" value="#ffffff" style="width:36px;height:28px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <label style="font-size:12px;color:var(--text-secondary);">Cor do contador:</label>
+                  <input type="color" id="desejo-count-color" value="#ffd700" style="width:36px;height:28px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+                </div>
+              </div>
+
+              <!-- Botões -->
+              <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="btn-add" id="btn-desejo-save" style="flex:1;">✔ Salvar</button>
+                <button class="btn-reset" id="btn-desejo-reset">🔄 Resetar progresso</button>
+              </div>
+
+              <!-- Progresso e URL -->
+              <div style="background:var(--bg-secondary);padding:10px 14px;border-radius:8px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                  <span style="font-size:13px;color:var(--text-secondary);">Progresso:</span>
+                  <span id="desejo-progress-display" style="font-size:14px;font-weight:700;color:#a855f7;">0 / 1</span>
+                </div>
+                <div style="font-size:11px;color:var(--text-secondary);">URL disponível na aba <strong>Links</strong> ↗</div>
+              </div>
+            </div>
+
+            <!-- GALERIA DE PRESENTES -->
+            <div style="background:var(--bg-tertiary);padding:16px;border-radius:12px;border:1px solid rgba(99,202,183,0.22);box-shadow:0 0 14px rgba(99,202,183,0.10);">
+              <h4 style="margin:0 0 12px;color:#63cab7;">🎖️ Galeria de Presentes</h4>
+
+              <!-- Liga selector -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Liga:</label>
+                <div style="display:flex;gap:6px;">
+                  <button id="galeria-liga-D" class="btn-galeria-liga active-liga" data-liga="D">🥉 Liga D</button>
+                  <button id="galeria-liga-C" class="btn-galeria-liga" data-liga="C">🥈 Liga C</button>
+                </div>
+              </div>
+
+              <!-- Título do overlay -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Título:</label>
+                <input type="text" id="galeria-title-input" class="form-input" style="flex:1;" placeholder="Ex: Galeria de Presentes" value="Galeria de Presentes">
+              </div>
+
+              <!-- Tema -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Tema:</label>
+                <select id="galeria-theme" class="form-input" style="flex:1;">
+                  <option value="neon">⚡ Neon</option>
+                  <option value="roxo">💜 Roxo</option>
+                  <option value="medieval">⚔️ Dourado</option>
+                  <option value="retro">👾 Retro</option>
+                  <option value="fire">🔥 Fogo</option>
+                  <option value="ice">❄️ Gelo</option>
+                  <option value="clean">🔲 Transparente</option>
+                  <option value="custom">🎨 Cor Personalizada</option>
+                </select>
+              </div>
+
+              <!-- Cor personalizada (só aparece se "custom") -->
+              <div id="galeria-custom-color-wrap" style="display:none;align-items:center;gap:8px;margin-bottom:8px;">
+                <label style="font-size:12px;color:var(--text-secondary);white-space:nowrap;min-width:80px;">Cor fundo:</label>
+                <input type="color" id="galeria-custom-color" value="#1a1f2e" style="width:42px;height:32px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+              </div>
+
+              <!-- Cores -->
+              <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <label style="font-size:11px;color:var(--text-secondary);">Título:</label>
+                  <input type="color" id="galeria-title-color" value="#ffffff" style="width:34px;height:28px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <label style="font-size:11px;color:var(--text-secondary);">Nome:</label>
+                  <input type="color" id="galeria-name-color" value="#00d4ff" style="width:34px;height:28px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <label style="font-size:11px;color:var(--text-secondary);">Contador:</label>
+                  <input type="color" id="galeria-counter-color" value="#ffd700" style="width:34px;height:28px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+                </div>
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <label style="font-size:11px;color:var(--text-secondary);">⭐ Meta batida:</label>
+                  <input type="color" id="galeria-complete-color" value="#ffd700" style="width:34px;height:28px;padding:2px;border:none;border-radius:6px;cursor:pointer;background:transparent;">
+                </div>
+              </div>
+
+              <!-- Botões -->
+              <div style="display:flex;gap:8px;margin-bottom:10px;">
+                <button class="btn-add" id="btn-galeria-save" style="flex:1;">✔ Aplicar</button>
+                <button class="btn-reset" id="btn-galeria-reset">🗑️ Resetar</button>
+              </div>
+
+              <!-- Lista de presentes da liga -->
+              <div id="galeria-gift-list" style="display:flex;flex-direction:column;gap:5px;"></div>
+
+              <div style="margin-top:8px;font-size:11px;color:var(--text-secondary);">URL disponível na aba <strong>Links</strong> ↗</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ALERTAS PANEL -->
+        <div class="ranking-content" id="ranking-alertas">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+
+            <!-- Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+              <div>
+                <h4 style="margin:0 0 2px;color:var(--accent-color);">🔔 Alertas de Live</h4>
+                <p style="font-size:12px;color:var(--text-secondary);margin:0;">Alertas visuais no OBS quando alguém enviar likes, seguir ou presente.</p>
+              </div>
+              <button class="btn-add" id="btn-add-alert" style="white-space:nowrap;flex-shrink:0;">+ Adicionar novo alerta</button>
+            </div>
+
+            <!-- URL está na aba Links -->
+
+            <!-- Tema -->
+            <div style="background:var(--bg-tertiary);padding:14px 16px;border-radius:12px;">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <label style="font-size:13px;color:var(--text-secondary);white-space:nowrap;font-weight:600;">🎨 Tema Visual:</label>
+                <select id="alert-theme-select" class="form-input" style="flex:1;min-width:200px;">
+                  <option value="roxo">💜 Roxo (Padrão)</option>
+                  <option value="neon">⚡ Neon (Azul & Rosa)</option>
+                  <option value="medieval">⚔️ Dourado</option>
+                  <option value="retro">👾 Retro/Arcade (Pixel)</option>
+                  <option value="fire">🔥 Fogo (Laranja)</option>
+                  <option value="ice">❄️ Gelo (Azul Claro)</option>
+                  <option value="clean">🔲 Transparente (Sem fundo)</option>
+                </select>
+                <button id="btn-alert-theme-save" class="btn-add" style="white-space:nowrap;padding:6px 14px;">✔ Aplicar tema</button>
+              </div>
+            </div>
+
+            <!-- Lista de alertas -->
+            <div id="alerts-list" style="display:flex;flex-direction:column;gap:8px;"></div>
           </div>
         </div>
 
@@ -1126,6 +1360,71 @@
                 <button class="btn-copy" onclick="copyLink('link-jar')">Copiar</button>
               </div>
             </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🔔</span>
+                <div>
+                  <h4>Alerta Cena 1</h4>
+                  <p>Overlay de alertas da Cena 1</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-alert-scene1" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-alert-scene1')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🔔</span>
+                <div>
+                  <h4>Alerta Cena 2</h4>
+                  <p>Overlay de alertas da Cena 2</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-alert-scene2" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-alert-scene2')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🔔</span>
+                <div>
+                  <h4>Alerta Cena 3</h4>
+                  <p>Overlay de alertas da Cena 3</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-alert-scene3" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-alert-scene3')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🌟</span>
+                <div>
+                  <h4>Desejo do Streamer</h4>
+                  <p>Contador de progresso para um presente escolhido</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-desejo" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-desejo')">Copiar</button>
+              </div>
+            </div>
+            <div class="link-card">
+              <div class="link-card-header">
+                <span class="link-card-icon">🎖️</span>
+                <div>
+                  <h4>Galeria de Presentes</h4>
+                  <p>Slideshow de presentes da liga com contadores de progresso</p>
+                </div>
+              </div>
+              <div class="link-copy-row">
+                <input type="text" class="link-input" id="link-galeria" readonly placeholder="Carregando...">
+                <button class="btn-copy" onclick="copyLink('link-galeria')">Copiar</button>
+              </div>
+            </div>
           </div>
 
           <div class="link-instructions">
@@ -1397,6 +1696,52 @@
       <div style="display:flex;gap:10px;justify-content:flex-end;">
         <button id="app-confirm-cancel" style="padding:8px 18px;border-radius:7px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#aaa;cursor:pointer;font-size:13px;">Cancelar</button>
         <button id="app-confirm-ok" style="padding:8px 18px;border-radius:7px;border:none;background:#ef4444;color:#fff;cursor:pointer;font-size:13px;font-weight:700;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERT MODAL -->
+  <div id="alert-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:var(--bg-secondary);border-radius:16px;padding:28px 24px;width:420px;max-width:95vw;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+      <h3 style="margin:0 0 18px;color:var(--accent-color);">🔔 <span id="alert-modal-title">Novo Alerta</span></h3>
+
+      <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Nome do alerta:</label>
+      <input type="text" id="alert-modal-name" class="form-input" style="width:100%;margin-bottom:14px;" placeholder="Ex: Alerta de Likes">
+
+      <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Tipo de alerta:</label>
+      <select id="alert-modal-type" class="form-input" style="width:100%;margin-bottom:14px;">
+        <option value="like">❤️ Alerta de Likes</option>
+        <option value="follow">👤 Alerta de Seguir</option>
+        <option value="gift">🎁 Alerta de Presente</option>
+        <option value="reminder">⏰ Lembrete Automático</option>
+      </select>
+
+      <!-- Campos extras para Lembrete Automático -->
+      <div id="alert-reminder-fields" style="display:none;margin-bottom:14px;padding:12px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:10px;">
+        <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Nome do lembrete:</label>
+        <input type="text" id="alert-modal-reminder-name" class="form-input" style="width:100%;margin-bottom:12px;" placeholder="Ex: 🔔 Lembrete">
+        <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Digite o lembrete:</label>
+        <input type="text" id="alert-modal-reminder-text" class="form-input" style="width:100%;margin-bottom:12px;" placeholder="Ex: Não esqueça de seguir!">
+        <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Repetir a cada:</label>
+        <div style="display:flex;gap:8px;">
+          <input type="number" id="alert-modal-interval-value" class="form-input" style="flex:1;min-width:0;" placeholder="30" min="1" value="30">
+          <select id="alert-modal-interval-unit" class="form-input" style="flex:1;min-width:0;">
+            <option value="seconds">Segundos</option>
+            <option value="minutes">Minutos</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:4px;">Cena do alerta:</label>
+      <select id="alert-modal-scene" class="form-input" style="width:100%;margin-bottom:18px;">
+        <option value="1">📺 Alerta Cena 1</option>
+        <option value="2">📺 Alerta Cena 2</option>
+        <option value="3">📺 Alerta Cena 3</option>
+      </select>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn-reset" id="alert-modal-cancel">Cancelar</button>
+        <button class="btn-add" id="alert-modal-save">✔ Salvar</button>
       </div>
     </div>
   </div>

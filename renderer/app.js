@@ -113,6 +113,49 @@ const GALERIA_LEAGUES = {
     { name:'Fireworks',        target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9494c8a0bc5c03521ef65368e59cc2b8~tplv-obj.webp' },
     { name:'Whale Diving',     target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/46fa70966d8e931497f5289060f9a794~tplv-obj.webp' },
     { name:'Meteor Shower',    target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/71883933511237f7eaa1bf8cd12ed575~tplv-obj.webp' }
+  ],
+  B: [
+    { name:'Rose',             target:30, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp' },
+    { name:'Doughnut',         target:10, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4e7ad6bdf0a1d860c538f38026d4e812~tplv-obj.webp' },
+    { name:'Hat and Mustache', target:8,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/2f1e4f3f5c728ffbfa35705b480fdc92~tplv-obj.webp' },
+    { name:'Hand Hearts',      target:8,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/6cd022271dc4669d182cad856384870f~tplv-obj.webp' },
+    { name:'Hearts',           target:7,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/934b5a10dee8376df5870a61d2ea5cb6.png~tplv-obj.webp' },
+    { name:'Corgi',            target:6,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/148eef0884fdb12058d1c6897d1e02b9~tplv-obj.webp' },
+    { name:'Money Gun',        target:5,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/e0589e95a2b41970f0f30f6202f5fce6~tplv-obj.webp' },
+    { name:'DJ Glasses',       target:5,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/d4aad726e2759e54a924fbcd628ea143.png~tplv-obj.webp' },
+    { name:'Swan',             target:4,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/97a26919dbf6afe262c97e22a83f4bf1~tplv-obj.webp' },
+    { name:'Galaxy',           target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/79a02148079526539f7599150da9fd28.png~tplv-obj.webp' },
+    { name:'Fireworks',        target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9494c8a0bc5c03521ef65368e59cc2b8~tplv-obj.webp' },
+    { name:'Whale Diving',     target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/46fa70966d8e931497f5289060f9a794~tplv-obj.webp' },
+    { name:'Meteor Shower',    target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/71883933511237f7eaa1bf8cd12ed575~tplv-obj.webp' },
+    { name:'Leon the Kitten',  target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a7748baba012c9e2d98a30dce7cc5a27~tplv-obj.webp' },
+    { name:'Flying Jets',      target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp' },
+    { name:'Future City',      target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/963b7c25aa2cedc0de22358342645e87.png~tplv-obj.webp' },
+    { name:'Interstellar',     target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp' },
+    { name:'Party On&On',      target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/c45505ece4a91d9c43e4ba98a000b006.png~tplv-obj.webp' },
+    { name:'Lion',             target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp' }
+  ],
+  A: [
+    { name:'Rose',             target:40, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/eba3a9bb85c33e017f3648eaf88d7189~tplv-obj.webp' },
+    { name:'Doughnut',         target:20, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4e7ad6bdf0a1d860c538f38026d4e812~tplv-obj.webp' },
+    { name:'Hat and Mustache', target:15, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/2f1e4f3f5c728ffbfa35705b480fdc92~tplv-obj.webp' },
+    { name:'Hand Hearts',      target:10, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/6cd022271dc4669d182cad856384870f~tplv-obj.webp' },
+    { name:'Hearts',           target:8,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/934b5a10dee8376df5870a61d2ea5cb6.png~tplv-obj.webp' },
+    { name:'Corgi',            target:6,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/148eef0884fdb12058d1c6897d1e02b9~tplv-obj.webp' },
+    { name:'Forever Rosa',     target:5,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/863e7947bc793f694acbe970d70440a1.png~tplv-obj.webp' },
+    { name:'Money Gun',        target:5,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/e0589e95a2b41970f0f30f6202f5fce6~tplv-obj.webp' },
+    { name:'Swan',             target:5,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/97a26919dbf6afe262c97e22a83f4bf1~tplv-obj.webp' },
+    { name:'Galaxy',           target:4,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/79a02148079526539f7599150da9fd28.png~tplv-obj.webp' },
+    { name:'Fireworks',        target:44, image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/9494c8a0bc5c03521ef65368e59cc2b8~tplv-obj.webp' },
+    { name:'Whale Diving',     target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/46fa70966d8e931497f5289060f9a794~tplv-obj.webp' },
+    { name:'Leon the Kitten',  target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a7748baba012c9e2d98a30dce7cc5a27~tplv-obj.webp' },
+    { name:'Flying Jets',      target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/1d067d13988e8754ed6adbebd89b9ee8.png~tplv-obj.webp' },
+    { name:'Future City',      target:3,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/963b7c25aa2cedc0de22358342645e87.png~tplv-obj.webp' },
+    { name:'Interstellar',     target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8520d47b59c202a4534c1560a355ae06~tplv-obj.webp' },
+    { name:'Party On&On',      target:2,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/resource/c45505ece4a91d9c43e4ba98a000b006.png~tplv-obj.webp' },
+    { name:'Lion',             target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/4fb89af2082a290b37d704e20f4fe729~tplv-obj.webp' },
+    { name:'Leon and Lion',    target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/a291aedacf27d22c3fd2d83575d2bee9~tplv-obj.webp' },
+    { name:'TikTok Universe',  target:1,  image:'https://p16-webcast.tiktokcdn.com/img/maliva/webcast-va/8f471afbcebfda3841a6cc515e381f58~tplv-obj.webp' }
   ]
 };
 let galeriaConfig   = loadFromStorage('galeriaConfig',   { league: 'D', title: 'Galeria de Presentes', theme: 'neon', titleColor: '#ffffff', nameColor: '#00d4ff', counterColor: '#ffd700', customColor: '#1a1f2e', completeColor: '#ffd700' });
@@ -3352,11 +3395,14 @@ function buildGaleriaPayload() {
   // Liga buttons
   const btnD = document.getElementById('galeria-liga-D');
   const btnC = document.getElementById('galeria-liga-C');
+  const btnB = document.getElementById('galeria-liga-B');
+  const btnA = document.getElementById('galeria-liga-A');
+  const allLigaBtns = [btnD, btnC, btnB, btnA];
 
   function setLeague(league) {
     galeriaConfig.league = league;
     saveToStorage('galeriaConfig', galeriaConfig);
-    [btnD, btnC].forEach(b => {
+    allLigaBtns.forEach(b => {
       if (!b) return;
       b.classList.toggle('active-liga', b.dataset.liga === league);
     });
@@ -3365,10 +3411,12 @@ function buildGaleriaPayload() {
   }
   if (btnD) btnD.addEventListener('click', () => setLeague('D'));
   if (btnC) btnC.addEventListener('click', () => setLeague('C'));
+  if (btnB) btnB.addEventListener('click', () => setLeague('B'));
+  if (btnA) btnA.addEventListener('click', () => setLeague('A'));
 
   // Restore saved league button state
   const savedLeague = galeriaConfig.league || 'D';
-  [btnD, btnC].forEach(b => {
+  allLigaBtns.forEach(b => {
     if (!b) return;
     b.classList.toggle('active-liga', b.dataset.liga === savedLeague);
   });

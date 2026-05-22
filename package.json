@@ -1,6 +1,6 @@
 {
   "name": "live-stream-ins",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "Live Stream INS - Controle de lives com presentes",
   "main": "main.js",
   "scripts": {
